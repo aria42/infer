@@ -1,5 +1,5 @@
 (ns infer.matrix-test
-  (:use clojure.contrib.test-is
+  (:use clojure.test
 		incanter.core)
   (:require (infer [matrix :as m])))
 
