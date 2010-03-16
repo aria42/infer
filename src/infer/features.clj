@@ -39,12 +39,3 @@
 (defn extract-ys [vs]
   [(map last vs)
    (map vec-but-last vs)])
-
-(defn double-matrix [xs]
-  (let [arr #^doubles
-	(make-array Double/TYPE (count xs) (count (first xs)))]
-    (dotimes [idx (count xs)]
-       (-> #^doubles arr 
-	   (aset (int idx) 
-		 (double-array (nth xs idx)))))
-    arr))

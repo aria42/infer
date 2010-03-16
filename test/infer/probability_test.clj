@@ -1,8 +1,7 @@
 (ns infer.probability-test
   (:use clojure.test)
+  (:use infer.core)
   (:use incanter.transformations)
-  ;(:use incanter.chrono)
-  (:use incanter.internal)
   (:use infer.classification)
   (:use infer.probability))
 
