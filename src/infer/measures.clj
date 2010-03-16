@@ -3,8 +3,8 @@
   (:use clojure.contrib.map-utils)
   (:use clojure.set)
   (:use [incanter.transformations :only [sort-map same-length?]])
-  (:use [incanter.probability :only [gt lt binary]])
-  (:use [incanter.internal :only [tree-comp-each]])
+  (:use [infer.core :only [tree-comp-each]])
+  (:use [infer.probability :only [gt lt binary]])
   (:import [org.apache.commons.math.stat.correlation
 	    PearsonsCorrelation Covariance])
   (:import [org.apache.commons.math.stat.descriptive.moment
