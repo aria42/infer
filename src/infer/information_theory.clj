@@ -1,7 +1,6 @@
 (ns infer.information-theory
   (:use [infer.probability :only [comb-merge]])
-  (:use [incanter.transformations :only [flatten-with]])
-  (:use [incanter.core :only [log2]]))
+  (:use [infer.core :only [flatten-with log2]]))
 
 (defn gini-impurity
   "Gini impurity is  measure of how often a chosen element from the set would be

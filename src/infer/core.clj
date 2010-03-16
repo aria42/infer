@@ -1,10 +1,13 @@
 (ns infer.core
+  (:import org.apache.commons.math.util.MathUtils)
   (:use clojure.contrib.monads)
   (:use [clojure.set :only (intersection)])
   (:use [clojure.contrib.seq-utils :only (flatten)]))
 
 ;;TODO: find tests for this stuff.
 
+(defn log2 [x]
+  (MathUtils/log 2 x))
 
 ;;TODO: this doesn't have to be macros if the m-lift is not a macro
 (defn lift-apply [f args]
@@ -142,7 +145,7 @@
   (not (= (count (distinct x))
 	  (count x))))
 
-; TODO: prune this old incanter.transformations code
+; TODO: prune this old infer.core code
 
 (defn same-length? [a b]
   (= (count a) (count b)))

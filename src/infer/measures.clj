@@ -2,7 +2,7 @@
   (:use clojure.contrib.math)
   (:use clojure.contrib.map-utils)
   (:use clojure.set)
-  (:use [incanter.transformations :only [sort-map same-length?]])
+  (:use [infer.core :only [sort-map same-length?]])
   (:use [infer.core :only [tree-comp-each]])
   (:use [infer.probability :only [gt lt binary]])
   (:import [org.apache.commons.math.stat.correlation

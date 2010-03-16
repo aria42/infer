@@ -6,8 +6,7 @@
    feature-name features."
   (:use [clojure.contrib.seq-utils :only [flatten]])
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
-  (:use [incanter.transformations :only [map-map levels-deep all-keys]])
-  (:use [infer.core :only [safe threshold-to]])
+  (:use [infer.core :only [safe threshold-to map-map levels-deep all-keys]])
   (:use [infer.probability :only [bucket +cond-prob-tuples]]))
 
 (defn classifier
