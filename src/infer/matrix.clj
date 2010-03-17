@@ -9,9 +9,8 @@
   (:import org.ujmp.core.doublematrix.calculation.general.decomposition.Chol))
 
 (defn ensure-vecs [xs]
-  (if (and (vector? xs) (vector? (first xs)))
-    xs
-    (vec (map vec xs))))
+  (let [to-vec #(if (vector? %) % (vec %))]
+    (to-vec (map to-vec xs))))
 
 (defn doubles-2d [xs]
   (let [vecs (ensure-vecs xs)
@@ -23,7 +22,9 @@
     arr))
 
 (defn matrix [xs]
-   (MatrixFactory/importFromArray #^"[[D" (doubles-2d xs)))
+  (if (not (coll? (first xs))) ;;1 column
+    (matrix (map vector xs))
+    (MatrixFactory/importFromArray #^"[[D" (doubles-2d xs))))
 
 (defn fill [v r c]
   (MatrixFactory/fill v (long-array [r c])))
