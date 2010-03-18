@@ -95,9 +95,6 @@
   (or (nil? coll) 
       (and (seqable? coll) (empty? coll))))
 
-(defn all-present? [ks m] 
-(not-any? nil-or-empty (map #(get m %) ks)))
-
 ;;TODO: all the safe stuff needs refacotring and generalization
 ;;should form a coherent system with above monadic compositions.
 (defn safe
@@ -126,10 +123,6 @@
   (or (nil? coll) 
       (and (seqable? coll) 
 	   (empty? coll))))
-
-(defn all-present? [ks m] 
-  (not-any? nil-or-empty? 
-	    (map #(get m %) ks)))
 
 (defn r-acc [look? extract x]
   "usage
