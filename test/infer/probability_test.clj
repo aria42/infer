@@ -1,7 +1,6 @@
 (ns infer.probability-test
   (:use clojure.test)
   (:use infer.core)
-  (:use infer.core)
   (:use infer.classification)
   (:use infer.probability))
 
@@ -165,15 +164,6 @@
    ((present-when
      #(> %1 %2) :a :b)
     {:b 20 :a 21}))))
-
-(deftest nested-tree-comp
-  (is (= 3
-   ((tree-comp
-      (tree-comp
-         #(+ %1 %2)
-         :a :b)
-      :c)
-      {:c {:a 1 :b 2}}))))
 
 (deftest nil-coll-test
   (is (= true
@@ -372,3 +362,10 @@
     (range 0 10 1)
     bucket-negative?)
     {:foo 3 :bar 4}))))
+
+(deftest tree-comp-with-p
+  (is (= [{1 {0 1}} {1 1}]
+	 ((P (present-when (tree-comp > :a 5)) | (present-when (tree-comp < :b 10))) {:a 4 :b 5})))
+  (is (= [{1 {1 1}} {1 1}]
+	 ((P (present-when (tree-comp > :a 5)) | (present-when (tree-comp < :b 10))) {:a 6 :b 6}))))
+

@@ -55,3 +55,36 @@
 (deftest flatten-map-test
   (is (= {":a:b:c" 1}
 	 (flatten-with str {:a {:b {:c 1}}}))))
+
+(deftest tree-comp-basic
+  (is (= 10
+	 ((tree-comp * #(- % 3) identity) 5))))
+
+(deftest tree-comp-modaic-properties
+ (is (= nil
+	((tree-comp + :a :b) {:a nil :b nil})))
+ (is (= nil
+	((tree-comp + :a :b) {})))
+  (is (= nil
+	 ((tree-comp + first second) [nil nil]))))
+
+(deftest tree-comp-apply-f-to-map-args
+  (is (= 3
+	 ((tree-comp + :a :b) {:a 1 :b 2})))
+  (is (= 3
+	 ((tree-comp + :a) {:a 3})))
+  (is (= 3
+	 ((tree-comp + :a 2) {:a 1 :b 2})))
+  (is (= -1
+	 (((fn [a & b] (apply tree-comp a b)) #(- %1 %2) :a :b) {:a 1 :b 2})))
+  (is (= -1
+	 ((tree-comp #(- %1 %2) :a :b) {:a 1 :b 2}))))
+
+(deftest tree-comp-nested
+  (is (= 3
+   ((tree-comp
+      (tree-comp
+         #(+ %1 %2)
+         :a :b)
+      :c)
+      {:c {:a 1 :b 2}}))))
