@@ -58,13 +58,6 @@
 	   branch)) 
        branches))))) 
 
-(defn all [& fs] 
-  (apply tree-comp 
-	 (fn [& xs] 
-	   (eval (conj xs 'and))) 
-	 fs))
-
-(def both all)
 (defn either [f g] (tree-comp (fn [a b] (or a b)) f g))  
 (defn neither [f g] (tree-comp (fn [a b] (not (or a b))) f g))  
 

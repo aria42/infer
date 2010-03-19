@@ -146,10 +146,6 @@
   (is ((constrain :a > 5) {:a 6}))
   (is (not ((constrain :a > 5) {:a 4}))))
 
-(deftest dual-constraint
-  (is ((both (constrain :a > 5) (constrain :b = 2)) {:a 6 :b 2}))
-  (is ((all (constrain :a > 5) (constrain :b = 2)) {:a 6 :b 2})))
-
 (deftest simple-presense
   (is (= 1 ((present-when (gt 5)) 6))))
 
