@@ -9,43 +9,11 @@
   (:use [infer.core :only [safe threshold-to map-map levels-deep all-keys]])
   (:use [infer.probability :only [bucket +cond-prob-tuples]]))
 
-(defn classifier
-  [fns classify]
-  (fn [data]
-    (classify fns data)))
-
-(defn numerical-classifiers
-  "Makes a bucketing classifier out of each range for use with |each."
+(defn discretizing-classifiers
+  "Makes a discretizing classifier out of each key-range pair."
   [ranges]
-  (into {}
-    (for [[k range] ranges]
-      [k (bucket k range)])))
-
-(defn categorical-classifiers
-  "Makes a categorical classifier for use with |each."
-  [features]
-  (into {}
-    (for [feature features]
-      [feature feature])))
-
-(defn category-classifier
-  [x]
-  {x 1})
-
-(defn category-map-classifier
-  ([x]
-   (map-map category-classifier x))
-  ([s x]
-   (category-map-classifier (into {} (filter #(contains? s (key %)) x)))))
-
-;;TODO: rename? likely to be confusing due to "wrapper and filter" taxonomy for
-;       feature selection.
-(defn wrapper-classifiers
-  "Makes a wrapping classifier like categortical but with wrapper fn."
-  [features]
-  (into {}
-    (for [[k wrapper] features]
-      [k #(wrapper (k %))])))
+  (for [[k range] ranges]
+    (bucket k range)))
 
 (defn classify-one-to-one
   "Takes a map of fns and a map of features, where there is one classifier fn per feature and they share the same key names in the classifier and feature maps.  apply each classifer fn to the corresponding feature.
@@ -76,14 +44,6 @@
   {:a 1}"
   [fns data]
   (into {} (for [[f-k f] fns] [f-k (f data)])))
-
-; this wrapping of the classifer in a fn/macro is necessary to stop cascading
-; from trying to serialize keywords, which are not serailizeable
-; classify all is here befcause we are classifying-many because we are
-; classifying each member of a time series.
-(defmacro classifier-macro
-  [classify classify-one-to-one]
-  `(fn [x#] (map (classifier ~classify ~classify-one-to-one) x#)))
 
 (defn classification-workflow
   "Composes a classification workflow from a classifier a counter and a

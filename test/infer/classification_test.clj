@@ -22,11 +22,12 @@
     (classify-one-to-all test-fns {:a 10 :b 5})))))
 
 (deftest classify-all-items
-  (let [c (classifier
-       {:a (present-when (gt 5)) :b (present-when (lt 5))}
-       classify-one-to-one)]
   (is (= [{:a 1 :b 0} {:a 0 :b 1}]
-    (map c [{:a 10 :b 5} {:a 4 :b 1}])))))
+    (map
+     #(classify-one-to-one
+       {:a (present-when (gt 5))
+	:b (present-when (lt 5))} %)
+     [{:a 10 :b 5} {:a 4 :b 1}]))))
 
 (deftest create-model-from-maps
   (is (=

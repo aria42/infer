@@ -6,113 +6,73 @@
   (:use infer.probability))
 
 (deftest counts-of-1
-  (let [c (classifier
-       {:a (present-when (gt 5)) :b (present-when (lt 5))}
-        classify-one-to-one)]
   (is (= {:a 1 :b 1}
-    ((classification-workflow
-     identity
-     c
-     (map-counter +)) [{:a 10 :b 5} {:a 4 :b 1}])))))
-
-(deftest probs-of-half
-  (let [c (classifier
-       {:a (present-when (gt 5)) :b (present-when (lt 5))}
-        classify-one-to-one)]
-  (is (= {:a 1 :b 1}
-    ((classification-workflow
-     identity
-     c
-     (map-counter +)) [{:a 10 :b 5} {:a 4 :b 1}])))))
+	 ((classification-workflow
+	   identity
+	   #(classify-one-to-one
+	     {:a (present-when (gt 5))
+	      :b (present-when (lt 5))}
+	     %)
+	   (map-counter +)) [{:a 10 :b 5} {:a 4 :b 1}]))))
 
 (deftest map-fn-to-map
   (is (=
        {:a true :b false}
        (map-map #(>  % 2)
-    {:a 3 :b 2}))))
+		{:a 3 :b 2}))))
 
 (deftest counts-by-fn
   (is  (=
-       {:gt2 {:a 1 :b 0} :lt3 {:a 1 :b 2}}
-       ((classification-workflow
-   identity
-    (classifier {:gt2 (present-when (gt 2))
-           :lt3 (present-when (lt 3))}
-                classify-one-to-each)
-    (map-counter +))
-    [{:a 3 :b 2} {:a 2 :b 1}]))))
+	{:gt2 {:a 1 :b 0} :lt3 {:a 1 :b 2}}
+	((classification-workflow
+	  identity
+	  #(classify-one-to-each
+	    {:gt2 (present-when (gt 2))
+	     :lt3 (present-when (lt 3))}
+	    %)
+	  (map-counter +))
+	 [{:a 3 :b 2} {:a 2 :b 1}]))))
 
 (deftest counts-each-cond-probs-test
   (is (= {:gt2  [{1 {0 1, 1 1}} {1 2}]}
    ((classification-workflow
     identity
-      (classifier
+      #(classify-one-to-all
        {:gt2 (P (present-when (tree-comp (gt 2) :a))
         | (present-when (tree-comp (lt 3) :b)))}
-       classify-one-to-all)
+       %)
     (map-counter +cond-prob-tuples))
     [{:a 3 :b 2}
      {:a 2 :b 1}]))))
 
-(deftest probs-each-cond-probs-test
-  (is (= {:gt2 [{1 {0 1, 1 1}} {1 2}]}
-   ((classification-workflow
-    identity
-    (classifier
-      {:gt2 (P (present-when (tree-comp (gt 2) :a))
-             | (present-when (tree-comp (lt 3) :b)))}
-     classify-one-to-all)
-    (map-counter +cond-prob-tuples))
-    [{:a 3 :b 2}
-     {:a 2 :b 1}]))))
-
-(deftest simple-counts
-  (is (= {6 1, 5 2, "tom" 2}
-    ((classification-workflow
-       identity
-       (classifier category-classifier  #(%1 %2))
-       (map-counter +))
-    ["tom" 5 6 5 "tom"]))))
-
-(deftest single-update
-  (is (= {:Carrier {"HA" 1} :Baz {"HB" 1}}
-   ((classification-workflow
-     identity
-     (classifier category-map-classifier #(%1 %2))
-     (map-counter +))
-     [{:Carrier "HA" :Baz "HB"}])))
-  (is (= {:Carrier {"HA" 1}}
-   ((classification-workflow
-    identity
-    (classifier
-       (partial category-map-classifier #{:Carrier}) #(%1 %2))
-    (map-counter +)) [{:Carrier "HA" :Baz "HB"}])))
-  (is (= {:Carrier {"HA" 1, "AA" 2, "VA" 3}}
-      ((classification-workflow
-        identity
-  (classifier (partial category-map-classifier #{:Carrier}) #(%1 %2) )
-  (map-counter +))
-       [{:Carrier "HA" :Baz "c"}
-        {:Carrier "VA" :Baz "c"}
-        {:Carrier "VA" :Baz "c"}
-        {:Carrier "VA" :Baz "c"}
-        {:Carrier "AA"}
-        {:Carrier "AA"}]))))
+(deftest categorical-classification-test
+  (is( =
+       [{"HA" {"X" {1 1}}} {"HA" {"X" 1}}]
+       ((P (present-when (constrain :z > 9))
+	    | [:Carrier :Dep])
+	{:Carrier "HA" :Dep "X" :z 10}))))
 
 (deftest conditional-probability-counts
   (is( =
-       {:Carrier [{"AA" {0 1, 1 1}, "VA" {0 2, 1 1}, "HA" {1 1}} {"AA" 2, "VA" 3, "HA" 1}],
-  :Dep [{"Z" {1 1, 0 2}, "Y" {0 1, 1 1}, "X" {1 1}} {"Z" 3, "Y" 2, "X" 1}]}
+       [{"AA" {"Y" {0 1}, 
+	       "Z" {1 1}},
+	 "VA" {"Z" {0 2},
+	       "Y" {1 1}},
+	 "HA" {"X" {1 1}}}
+	{"AA" {"Y" 1, "Z" 1},
+	 "VA" {"Z" 2, "Y" 1},
+	 "HA" {"X" 1}}]
        ((classification-workflow
-   identity
-   (P (present-when (constrain :z > 9)) |each (categorical-classifiers [:Carrier :Dep]))
-   (map-counter +cond-prob-tuples))
-  [{:Carrier "HA" :Dep "X" :z 10}
-   {:Carrier "VA" :Dep "Y" :z 9.1}
-   {:Carrier "VA" :Dep "Z" :z 4}
-   {:Carrier "VA" :Dep "Z" :z 8.999}
-   {:frk "o" :Carrier "AA" :Dep "Z" :z 9.1}
-   {:f "foo" :Carrier "AA" :Dep "Y" :z 8.999}]))))
+	 identity
+	 (P (present-when (constrain :z > 9))
+	    | [:Carrier :Dep])
+	 (vector-counter +cond-prob-tuples))
+	[{:Carrier "HA" :Dep "X" :z 10}
+	 {:Carrier "VA" :Dep "Y" :z 9.1}
+	 {:Carrier "VA" :Dep "Z" :z 4}
+	 {:Carrier "VA" :Dep "Z" :z 8.999}
+	 {:frk "o" :Carrier "AA" :Dep "Z" :z 9.1}
+	 {:f "foo" :Carrier "AA" :Dep "Y" :z 8.999}]))))
 
 (deftest count-missing-test
   (is (= {:a 1}
@@ -318,11 +278,12 @@
 
 (deftest conditional-probability-in-ranges
   (is( =
-  {:Carrier [{1 {0 2}, 2 {0 1, 1 2}, 0 {1 1}} {1 2, 2 3, 0 1}]}
+  [{1 {0 2}, 2 {0 1, 1 2}, 0 {1 1}} {1 2, 2 3, 0 1}]
        ((classification-workflow
    identity
-   (P (present-when (constrain :z > 9)) |each (numerical-classifiers {:Carrier (range 1 5 1)}))
-   (map-counter +cond-prob-tuples))
+   (P (present-when (constrain :z > 9))
+      | (discretizing-classifiers {:Carrier (range 1 5 1)}))
+   (vector-counter +cond-prob-tuples))
        [{:Carrier 1 :Dep "X" :z 10}
         {:Carrier 3 :Dep "Y" :z 9.1}
         {:Carrier 2 :Dep "Z" :z 4}

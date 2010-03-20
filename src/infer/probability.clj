@@ -186,15 +186,6 @@
    label-cond-prob-dependent
    a b))
 
-(defn |each
-  "Conditional probability where the bs are taken to be a map of
-   feature->classifier-function paris, where we want to compute the conditional
-   probability between a and each b independently."
-  [a bs]
-  (fn [obs]
-    (into {} (for [[k b] bs]
-               [k (cond-prob-tuple (a obs) (b obs))]))))
-
 (defn P
   ([a given b & bs]
    (given a (cons b bs)))
