@@ -5,11 +5,20 @@
   (:use [infer.core :only [sort-map same-length?]])
   (:use [infer.core :only [tree-comp-each]])
   (:use [infer.probability :only [gt lt binary]])
+  (:import org.apache.commons.math.stat.StatUtils)
   (:import [org.apache.commons.math.stat.correlation
 	    PearsonsCorrelation Covariance])
+  (:import org.apache.commons.math.stat.descriptive.summary.Sum)
   (:import [org.apache.commons.math.stat.descriptive.moment
 	    Mean StandardDeviation Variance]))
 
+(defn sum [xs]
+  (StatUtils/sum (double-array xs)))
+ 
+(defn weighted-sum
+  [xs weights]
+   (sum (map #(* %1 %2) xs weights)))
+		    
 (defn mean [xs] (.evaluate
 		  (Mean.)
 		   (double-array xs)))
@@ -40,13 +49,6 @@
 ;;look for old impl, ore reimpliment.  http://en.wikipedia.org/wiki/Mahalanobis_distance
 
 ;;TODO mote this to a new task in tracker: nonparametric stuff such as: http://en.wikipedia.org/wiki/Median_absolute_deviation
-
-;;smoothing.
-;;http://en.wikipedia.org/wiki/Smoothing
-;;http://en.wikipedia.org/wiki/Kernel_smoother
-;;http://en.wikipedia.org/wiki/Kernel_density_estimation
-;;http://en.wikipedia.org/wiki/Local_regression
-;;http://en.wikipedia.org/wiki/Kernel_regression
 
 ;;DEPENDENCE
 ;; http://en.wikipedia.org/wiki/Association_(statistics)

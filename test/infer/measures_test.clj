@@ -2,6 +2,16 @@
   (:use clojure.test)
   (:use infer.measures))
 
+(deftest sum-test
+ (is (= 9
+      (sum [2 3 4]))))
+
+(deftest weighted-sum-test
+ (is (= 9
+      (weighted-sum [2 3 4] [1 1 1])))
+ (is (= 4.5
+      (weighted-sum [2 3 4] [0.5 0.5 0.5]))))
+
 (deftest sample-mean
  (is (= 3 
       (mean [2 3 4]))))
