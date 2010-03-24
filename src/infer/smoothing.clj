@@ -31,5 +31,4 @@
   (let [distance (fn [p] (sum (map #(abs (- %1 %2)) p point)))
 	weights (map (comp weigh distance first) points)
 	weighted (weighted-sum (map second points) weights)]
-    (prn distance " " weights " " weighted)
     (/ weighted (sum weights))))
