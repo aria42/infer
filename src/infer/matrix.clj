@@ -21,10 +21,19 @@
 		 #^doubles (double-array (nth vecs idx))))
     arr))
 
+(defn with-intercept [xs]
+  (if (not (coll? (first xs))) ;;1 column
+    (map #(vector 1 %) xs)
+    (map #(vec (cons 1 %)) xs)))
+  
 (defn matrix [xs]
   (if (not (coll? (first xs))) ;;1 column
     (matrix (map vector xs))
     (MatrixFactory/importFromArray #^"[[D" (doubles-2d xs))))
+
+(defn from-matrix [X]
+ (map #(into [] %)
+      (.toDoubleArray X)))
 
 (defn fill [v r c]
   (MatrixFactory/fill v (long-array [r c])))
@@ -50,11 +59,17 @@
 	     r c)
      m))
 
-(defn times [A B]
-  (.mtimes #^DenseDoubleMatrix2D A #^DenseDoubleMatrix2D B))
+(defn times [#^DenseDoubleMatrix2D A #^DenseDoubleMatrix2D B]
+  (.mtimes A B))
 
-(defn trans [A]
-  (.transpose #^DenseDoubleMatrix2D A))
+(defn trans [#^DenseDoubleMatrix2D A]
+  (.transpose A))
 
-(defn svd [A]
-  (.svd #^DenseDoubleMatrix2D A))
+(defn svd [#^DenseDoubleMatrix2D A]
+  (.svd A))
+
+(defn solve [#^DenseDoubleMatrix2D A #^DenseDoubleMatrix2D B]
+  (.solve A B))
+
+(defn inv [#^DenseDoubleMatrix2D A]
+  (.inv A))

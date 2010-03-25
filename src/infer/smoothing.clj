@@ -41,6 +41,8 @@
 (defn inverse [d] (/ 1 d))
 
 (defn weighted-knn [point weigh points]
+"takes a query point, a weight fn, and a seq of points, and returns the weighted sum of the points divided but the sum of the weights. the weigh fn is called with the query point and each point in the points seq.  the weigh fn is thus a composition of a weight fn and a distance measure.
+"
   (let [weights (map #(weigh point (first %)) points)
 	weighted (weighted-sum (map second points) weights)]
     (/ weighted (sum weights))))

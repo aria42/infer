@@ -24,3 +24,10 @@
 	single-m (matrix [1 2 3 4 5 6])]
 	   (is (= 6 (get-at m 1 2)))
 	   (is (= 6 (get-at single-m 5 0)))))
+
+(deftest to-and-from-matrix
+  (let [a [[1 2 3] [4 5 6]]
+	A (matrix
+	   [[1 2 3] [4 5 6]])
+	b (from-matrix A)]
+	(is (= a b))))
