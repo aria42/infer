@@ -334,7 +334,6 @@ Minkowski distance is typically used with p being 1 or 2. The latter is the Eucl
 In the limiting case of p reaching infinity we obtain the Chebyshev distance."
  [a b p]
 (let [_ (assert (same-length? a b))]
-
  (pow
   (apply
    tree-comp-each

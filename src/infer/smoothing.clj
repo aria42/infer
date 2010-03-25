@@ -12,23 +12,37 @@
 (defn all? [bools]
   (every? identity bools))
 
-(defn range-query [point radius points]
-  (let [one-d (number? point)
-	range-pred (if one-d #(<= (abs (- point (first %))) radius)
-		       (fn [xys]
-			 (all? (map (fn [x r p]
-				      (<= (abs (- p x)) r))
-				    (first xys)
-				    radius
-				    point))))]
-    (filter range-pred
-	    points)))
+(defn one-d-distance [x1 x2]
+ (abs (- x1 x2)))
+
+(defn euclid-query [point dist] 
+  (if (number? point)
+    #(<= (one-d-distance point %) dist)
+    #(<= (euclidean-distance point %)
+	 dist)))
+
+(defn rectangle-query [point lengths]
+  (fn [xys]
+    (all? (map (fn [x r p]
+		 (<= (one-d-distance p x) r))
+	       xys
+	       lengths
+	       point))))
+
+(defn filter-by [keyfn pred coll]
+  (filter (comp pred keyfn) coll))
+
+(defn filter-xys [pred coll]
+  (filter (comp pred first) coll))
 
 (defn knn [points]
   (mean (map second points)))
 
+(defn inverse [d] (/ 1 d))
+
 (defn weighted-knn [point weigh points]
-  (let [distance (fn [p] (sum (map #(abs (- %1 %2)) p point)))
-	weights (map (comp weigh distance first) points)
+  (let [weights (map #(weigh point (first %)) points)
 	weighted (weighted-sum (map second points) weights)]
     (/ weighted (sum weights))))
+
+;;TODO: parameterize distance fn into weighing.
