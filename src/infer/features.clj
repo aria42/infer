@@ -39,3 +39,7 @@
 (defn extract-ys [vs]
   [(map last vs)
    (map vec-but-last vs)])
+
+(defn seq-trans [seqs]
+"transpose a seq of seqs.  useful to transform multi-class output vectors into vectors of outputs for each class."
+  (apply map list seqs))

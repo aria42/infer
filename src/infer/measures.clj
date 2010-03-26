@@ -46,7 +46,7 @@
 
 ;;TODO: finish gamma, kendall's-w and 
 
-;;look for old impl, ore reimpliment.  http://en.wikipedia.org/wiki/Mahalanobis_distance
+;;look for old impl, or reimpliment.  http://en.wikipedia.org/wiki/Mahalanobis_distance
 
 ;;TODO mote this to a new task in tracker: nonparametric stuff such as: http://en.wikipedia.org/wiki/Median_absolute_deviation
 

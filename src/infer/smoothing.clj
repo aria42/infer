@@ -1,5 +1,6 @@
 (ns infer.smoothing
   (:use infer.measures)
+  (:use infer.features)
   (:use clojure.contrib.math))
 
 ;;smoothing.
@@ -29,22 +30,34 @@
 	       lengths
 	       point))))
 
-(defn filter-by [keyfn pred coll]
-  (filter (comp pred keyfn) coll))
+;;http://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm
+;;http://en.wikipedia.org/wiki/Nearest_neighbor_search
+;;naive
+(defn nearest-neighbors [k point dist coll]
+  (take k
+	(sort-by 
+	 #(dist point (first %))
+	 coll)))
 
-(defn filter-xys [pred coll]
+;;TODO: change sigs to match the matrix apis of xs & ys rather that [xs & ys]
+(defn within-region [pred coll]
   (filter (comp pred first) coll))
 
-(defn knn [points]
-  (mean (map second points)))
+(defn single-class? [points]
+  (number? (second (first points))))
 
+;;TODO: move elsewhere.
 (defn inverse [d] (/ 1 d))
 
+(defn mean-output [points]
+    (if (single-class? points)
+      (mean (map second points))
+      (map mean (seq-trans (map second points)))))
+
+;;TODO: update for multi-class
 (defn weighted-knn [point weigh points]
 "takes a query point, a weight fn, and a seq of points, and returns the weighted sum of the points divided but the sum of the weights. the weigh fn is called with the query point and each point in the points seq.  the weigh fn is thus a composition of a weight fn and a distance measure.
 "
   (let [weights (map #(weigh point (first %)) points)
 	weighted (weighted-sum (map second points) weights)]
     (/ weighted (sum weights))))
-
-;;TODO: parameterize distance fn into weighing.
