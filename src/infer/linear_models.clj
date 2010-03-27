@@ -24,5 +24,4 @@
 
 (defn predict [B xs]
   (let [X (matrix xs)]
-    (times (trans B) X)))  
-	
+    (times (trans B) X)))	

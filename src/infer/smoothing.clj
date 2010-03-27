@@ -3,7 +3,7 @@
   (:use infer.features)
   (:use clojure.contrib.math))
 
-;;smoothing.
+;;TODO: is motthing really the right name for this lib?  Density estimation?  k-NN & kernels?
 ;;http://en.wikipedia.org/wiki/Smoothing
 ;;http://en.wikipedia.org/wiki/Kernel_smoother
 ;;http://en.wikipedia.org/wiki/Kernel_density_estimation
@@ -46,7 +46,7 @@
 (defn single-class? [points]
   (number? (second (first points))))
 
-;;TODO: move elsewhere.
+;;TODO: move elsewhere with lib of kernel fns.
 (defn inverse [d] (/ 1 d))
 
 (defn mean-output [points]
@@ -54,10 +54,15 @@
       (mean (map second points))
       (map mean (seq-trans (map second points)))))
 
-;;TODO: update for multi-class
 (defn weighted-knn [point weigh points]
 "takes a query point, a weight fn, and a seq of points, and returns the weighted sum of the points divided but the sum of the weights. the weigh fn is called with the query point and each point in the points seq.  the weigh fn is thus a composition of a weight fn and a distance measure.
 "
   (let [weights (map #(weigh point (first %)) points)
-	weighted (weighted-sum (map second points) weights)]
-    (/ weighted (sum weights))))
+	divisor (sum weights)]
+    (if (single-class? points)
+	(/
+	 (weighted-sum (map second points) weights)
+	 divisor)
+        (map #(/ % divisor)
+	     (map #(weighted-sum % weights)
+		  (seq-trans (map second points)))))))
