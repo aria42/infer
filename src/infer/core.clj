@@ -9,6 +9,17 @@
 (defn log2 [x]
   (MathUtils/log 2 x))
 
+(def pi Math/PI)
+
+(def e Math/E)
+
+(defn cos [x] (Math/cos x)) 
+(defn acos [x] (Math/acos x)) 
+(defn sin [x] (Math/sin x)) 
+(defn asin [x] (Math/asin x)) 
+(defn tan [x] (Math/tan x)) 
+(defn atan [x] (Math/atan x)) 
+
 ;;TODO: this doesn't have to be macros if the m-lift is not a macro
 (defn lift-apply [f args]
   ((m-lift 1 (partial apply f)) args))

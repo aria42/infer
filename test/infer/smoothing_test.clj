@@ -68,7 +68,7 @@
 
 (deftest weighted-knn-test
   (is (= 0.5419354838709678
-	 (weighted-knn
+	 (nadaraya-watson-estimator
 	  [5 3]
 	  (comp inverse manhattan-distance)
 	  [[[1 3] 0.5]
@@ -78,7 +78,7 @@
 	   [[5 1] 0.8]])))
   (is (= [0.5419354838709678
 	  0.5419354838709678]
-	 (weighted-knn
+	 (nadaraya-watson-estimator
 	  [5 3]
 	  (comp inverse manhattan-distance)
 	  [[[1 3] [0.5 0.5]]
@@ -86,3 +86,31 @@
 	   [[3 2] [0.3 0.3]]
 	   [[4 6] [0.3 0.3]]
 	   [[5 1] [0.8 0.8]]]))))
+
+(deftest uniform-test
+  (is (= 0 (uniform 7)))
+  (is (= 1/2 (uniform 0.764))))
+
+(deftest triangular-test
+  (is (= 0 (triangular 7)))
+  (is (= 0.236 (triangular 0.764))))
+
+(deftest epanechnikov-test
+  (is (= 0 (epanechnikov 7)))
+  (is (= 0.7103250000000001 (epanechnikov 0.23))))
+
+(deftest biweight-test
+  (is (= 0 (biweight 7)))
+  (is (= 0.723538090666667 (biweight 0.42))))
+
+(deftest triweight-test
+  (is (= 0 (triweight 7)))
+  (is (= 0.61103639653 (triweight 0.42))))
+
+(deftest gaussian-test
+  (is (= 0.05399096651318806 (gaussian 2)))
+  (is (= 0.3652626726221539 (gaussian 0.42))))
+
+(deftest cosine-test
+  (is (= 0 (cosine 2)))
+  (is (= 0.6205862955191552 (cosine 0.42))))
