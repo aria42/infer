@@ -66,6 +66,18 @@
 	   [[4 6] [0.3 0.1]]
 	   [[5 1] [0.8 0.2]]]))))
 
+(deftest calc-weights
+  (is (= [0.25 0.14285714285714285 0.3333333333333333
+	  0.25 0.5]
+	 (weights
+	  [5 3]
+	  (comp inverse manhattan-distance)
+	  [[[1 3] 0.5]
+	   [[2 7] 0.7]
+	   [[3 2] 0.3]
+	   [[4 6] 0.3]
+	   [[5 1] 0.8]]))))
+
 (deftest weighted-knn-test
   (is (= 0.5419354838709678
 	 (nadaraya-watson-estimator

@@ -37,10 +37,31 @@
  72.19
  74.46])
 
-(deftest simple-regresssion-tests
-  (let [r1 (my-ols-linear-model 
+(deftest simple-regression-tests
+  (let [r1 (ols-linear-model 
 	   weight height)
-	r2 (ols-linear-model
+	r2 (commons-ols-linear-model
 	    weight height)]
     (is (= [[37.713145382089586]] (from-matrix r1)))	
     (is (= [37.713145382089586] (betas r2)))))
+
+(deftest gls-regression-tests
+  (let [n (count weight)
+	bs (gls-linear-model
+	    weight height (I [n n]))
+	bs2 (commons-gls-linear-model
+	    weight height (to-diag (repeat n 1)))]
+    (is (= [[37.713145382089586]] (from-matrix bs)))
+    (is (= [37.713145382089586] (betas bs2)))))
+
+(deftest weighted-regression-tests
+  (let [n (count weight)
+	bs (weighted-linear-model
+	    weight height (repeat n 1))
+	bs2 (weighted-linear-model
+	    weight height (range 1 (+ 1 n)))
+	bs3 (commons-gls-linear-model
+	    weight height (to-diag (range 1 (+ 1 n))))]
+    (is (= [[37.713145382089586]] (from-matrix bs)))
+    (is (= [[36.56120274286958]] (from-matrix bs2)))
+    (is (= [36.561202742869575] (betas bs3)))))

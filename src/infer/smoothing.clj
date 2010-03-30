@@ -5,6 +5,9 @@
   (:use clojure.contrib.math))
 
 ;;TODO: is motthing really the right name for this lib?  Density estimation?  k-NN & kernels?
+;;TODO: change sigs to match the matrix apis of xs & ys rather that [xs & ys]
+
+
 ;;http://en.wikipedia.org/wiki/Smoothing
 ;;http://en.wikipedia.org/wiki/Kernel_smoother
 ;;http://en.wikipedia.org/wiki/Kernel_density_estimation
@@ -32,6 +35,8 @@
 	       lengths
 	       point))))
 
+;;nearest neighbors fitlers points for k-nn, within-region filters points based a region query; a hyper rectangle or a radius for kernels.
+
 ;;http://en.wikipedia.org/wiki/K-nearest_neighbor_algorithm
 ;;http://en.wikipedia.org/wiki/Nearest_neighbor_search
 ;;naive impl
@@ -41,14 +46,13 @@
 	 #(dist point (first %))
 	 coll)))
 
-;;TODO: change sigs to match the matrix apis of xs & ys rather that [xs & ys]
 (defn within-region [pred coll]
   (filter (comp pred first) coll))
 
 (defn single-class? [points]
   (number? (second (first points))))
 
-;;TODO: move elsewhere with lib of kernel fns?  inverse is a common nn weighing function, but not technicly a kernel.
+;;inverse is a common nn weighing function, but not technicly a kernel.
 (defn inverse [d] (/ 1 d))
 
 ;;Kernel weighing functions
@@ -89,6 +93,9 @@
       (mean (map second points))
       (map mean (seq-trans (map second points)))))
 
+(defn weights [point weigh points]
+  (map #(weigh point (first %)) points))
+
 ;;kernel regression
 ;;http://en.wikipedia.org/wiki/Kernel_regression
 
@@ -97,20 +104,21 @@
 
 ;;TODO:
 ;;1. pass the distance fn and weighing fn seperately rahter than composing into weigh prior to calling?
+;;for kernels, but weighted mean calc is identical for k-nn
 (defn nadaraya-watson-estimator [point weigh points]
 "takes a query point, a weight fn, and a seq of points, and returns the weighted sum of the points divided but the sum of the weights. the weigh fn is called with the query point and each point in the points seq.  the weigh fn is thus a composition of a weight fn and a distance measure.
 
 http://en.wikipedia.org/wiki/Kernel_regression#Nadaraya-Watson_kernel_regression
 
 "
-  (let [weights (map #(weigh point (first %)) points)
-	divisor (sum weights)]
+  (let [weights* (weights point weigh points)
+	divisor (sum weights*)]
     (if (single-class? points)
 	(/
-	 (weighted-sum (map second points) weights)
+	 (weighted-sum (map second points) weights*)
 	 divisor)
         (map #(/ % divisor)
-	     (map #(weighted-sum % weights)
+	     (map #(weighted-sum % weights*)
 		  (seq-trans (map second points)))))))
 
 ;;TODO: other kernel estimators?

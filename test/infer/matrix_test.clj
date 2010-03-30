@@ -31,3 +31,15 @@
 	   [[1 2 3] [4 5 6]])
 	b (from-matrix A)]
 	(is (= a b))))
+
+(deftest identity-matrix
+  (let [i (from-matrix (I [2 2]))]
+	(is (= [[1 0]
+		[0 1]]
+	       i))))
+
+(deftest create-diagonal-weights
+  (is (= [[1 0 0]
+	  [0 2 0]
+	  [0 0 3]]
+	  (to-diag [1 2 3]))))

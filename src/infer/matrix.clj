@@ -27,9 +27,12 @@
     (map #(vec (cons 1 %)) xs)))
   
 (defn matrix [xs]
-  (if (not (coll? (first xs))) ;;1 column
-    (matrix (map vector xs))
-    (MatrixFactory/importFromArray #^"[[D" (doubles-2d xs))))
+  (cond (not (coll? xs)) ;;already a matrix
+	xs
+	(not (coll? (first xs))) ;;1 column
+	(matrix (map vector xs))
+	:else
+	(MatrixFactory/importFromArray #^"[[D" (doubles-2d xs))))
 
 (defn from-matrix [X]
  (map #(into [] %)
@@ -38,12 +41,34 @@
 (defn fill [v r c]
   (MatrixFactory/fill v (long-array [r c])))
 
-(defn rand-elems [r c] 
-  (let [ra (Random.)]
-    (partition c (repeatedly (* c r) #(.nextDouble ra)))))
+(defn I
+"identity matrix"
+[dimensions] (MatrixFactory/eye (long-array dimensions)))
+
+(defn rand-elems
+  ([n]
+     (let [ra (Random.)]
+       (repeatedly n #(.nextDouble ra))))
+  ([r c] 
+     (repeatedly r #(rand-elems c))))
+
+;;TODO: replace random matrix with.
+;; // create a matrix filled with random numbers (Gaussian distribution):
+;; Matrix m5 = MatrixFactory.randn(10, 3);
+ 
+;; // create a matrix filled with random numbers (uniform distribution):
+;; Matrix m6 = MatrixFactory.rand(5, 5);
 
 (defn fill-rand [r c]
   (matrix (rand-elems r c)))
+
+(defn to-diag [xs]
+  (let [n (count xs)
+	is (range 0 (+ 1 n))
+	zeros (vec (repeat n 0))]
+    (map (fn [x i]
+	   (assoc zeros i x))
+	 xs is)))
 
 (defn get-at [#^DoubleMatrix2D m r c]
   (.getDouble m (int r) (int c)))

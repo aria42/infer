@@ -1,20 +1,35 @@
 (ns infer.linear-models
-  (:import org.apache.commons.math.stat.regression.OLSMultipleLinearRegression)
+  (:import [org.apache.commons.math.stat.regression
+	    OLSMultipleLinearRegression
+	    GLSMultipleLinearRegression])
   (:use infer.matrix))
 
-(defn ols-linear-model [ys xs*]
-  (let [xs (if (coll? (first xs*)) xs*
-	     (map vector xs*))]
+(defn vecize-1d
+"if this is the 1d case, put each calue in a vec."
+[xs]
+  (if (coll? (first xs)) xs
+      (map vector xs)))
+
+(defn commons-ols-linear-model [ys xs*]
+  (let [xs (vecize-1d xs*)]
     (doto
 	(OLSMultipleLinearRegression.)
       (.newSampleData (double-array ys)
 		      (doubles-2d xs)))))
 
+(defn commons-gls-linear-model [ys xs* sigma]
+  (let [xs (vecize-1d xs*)]
+    (doto
+	(GLSMultipleLinearRegression.)
+      (.newSampleData (double-array ys)
+		      (doubles-2d xs)
+		      (doubles-2d sigma)))))
+
 (defn betas [m]
 "get the betas from an OLSMultipleLinearRegression model."
   (into [] (.estimateRegressionParameters m)))
 
-(defn my-ols-linear-model [ys xs]
+(defn ols-linear-model [ys xs]
  (let [X (matrix xs)
        Y (matrix ys)
        Xt (trans X)
@@ -24,4 +39,18 @@
 
 (defn predict [B xs]
   (let [X (matrix xs)]
-    (times (trans B) X)))	
+    (times (trans B) X)))
+
+(defn gls-linear-model [ys xs sigma]
+ (let [X (matrix xs)
+       Y (matrix ys)
+       S (matrix sigma)
+       Si (inv S)
+       Xt (trans X)
+       XtSi (times Xt Si)
+       XtSiX (times XtSi X)
+       XtSiY (times XtSi Y)]
+       (times (inv XtSiX) XtSiY)))
+
+(defn weighted-linear-model [ys xs weights]
+  (gls-linear-model ys xs (to-diag weights)))
