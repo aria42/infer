@@ -149,16 +149,13 @@
 ;;    :otherwise (range-classifier r val-to-bucket))
 (defn bucket
   ([f r] (bucket f identity r))
-  ([f t r] (bucket f t r always-false))
-  ([f t r p]
+  ([f t r]
      (fn [x]
        (let [trans (t x)]
          (if (nil? trans) :missing
             (let [val-to-bucket (f trans)]
                (if (nil? val-to-bucket) :missing
-                   (if-let [short-circuit (p val-to-bucket)]
-                     short-circuit
-                     (range-classifier r val-to-bucket)))))))))
+                   (range-classifier r val-to-bucket))))))))
 
 (defn cond-prob-tuple
   "build [a&b b] count tuples for calculating conditional probabilities p(a | b)"

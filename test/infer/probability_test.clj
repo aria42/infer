@@ -343,21 +343,7 @@
     (fn [[x y]] (+ x y))
     :foo
     (range 0 10 1))
-    {:foo nil})))
- (is (= :short-circuit
-   ((bucket
-    (fn [[x y]] (+ x y))
-    #(vector (:foo %) (:bar %))
-    (range 0 10 1)
-    #(if (> 10 %) :short-circuit false))
-    {:foo 3 :bar 4})))
- (is (= :negative
-   ((bucket
-    (fn [[x y]] (- x y))
-    #(vector (:foo %) (:bar %))
-    (range 0 10 1)
-    bucket-negative?)
-    {:foo 3 :bar 4}))))
+    {:foo nil}))))
 
 (deftest tree-comp-with-p
   (is (= [{1 {0 1}} {1 1}]
