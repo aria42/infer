@@ -330,7 +330,7 @@ http://en.wikipedia.org/wiki/Lp_space
 The Minkowski distance is a metric on Euclidean space which can be considered as a generalization of both the Euclidean distance and the Manhattan distance.
 
 Minkowski distance is typically used with p being 1 or 2. The latter is the Euclidean distance, while the former is sometimes known as the Manhattan distance.
-
+`
 In the limiting case of p reaching infinity we obtain the Chebyshev distance."
  [a b p]
 (let [_ (assert (same-length? a b))]

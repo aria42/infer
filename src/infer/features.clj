@@ -14,13 +14,23 @@
 (defn feature-vectors
   ([vect m]
       (for [[k v] m
-	    :let [ky (if (= :missing k) 0 k) 
-		  next-vect (conj vect ky)]]
-        (cond (not (map? v))
+	    :let [next-vect (conj vect k)]]
+        (cond (number? v)
 	  (repeat v next-vect)
 	  :otherwise
 	  (feature-vectors next-vect v))))
   ([m] (flatten-seqs (feature-vectors [] m))))
+
+(defn vectors-as-keys
+"transforms the nested map representation into a vector-as-key with count-as-value representation."
+  ([vect m]
+      (for [[k v] m
+	    :let [next-vect (conj vect k)]]
+        (cond (number? v)
+	  (conj next-vect v)
+	  :otherwise
+	  (vectors-as-keys next-vect v))))
+  ([m] (flatten-seqs (vectors-as-keys [] m))))
 
 (defn remove-at [i v]
   (concat (subvec v 0 i)

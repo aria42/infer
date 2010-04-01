@@ -153,9 +153,9 @@
   ([f t r p]
      (fn [x]
        (let [trans (t x)]
-         (if (missing? trans) :missing
+         (if (nil? trans) :missing
             (let [val-to-bucket (f trans)]
-               (if (missing? val-to-bucket) :missing
+               (if (nil? val-to-bucket) :missing
                    (if-let [short-circuit (p val-to-bucket)]
                      short-circuit
                      (range-classifier r val-to-bucket)))))))))

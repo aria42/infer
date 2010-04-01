@@ -341,9 +341,9 @@
  (is (= :missing
    ((bucket
     (fn [[x y]] (+ x y))
-    #(vector (:foo %) (:bar %))
+    :foo
     (range 0 10 1))
-    {:foo 3 :bar nil})))
+    {:foo nil})))
  (is (= :short-circuit
    ((bucket
     (fn [[x y]] (+ x y))
