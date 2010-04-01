@@ -25,7 +25,7 @@
 		      (doubles-2d xs)
 		      (doubles-2d sigma)))))
 
-(defn betas [m]
+(defn commons-betas [m]
 "get the betas from an OLSMultipleLinearRegression model."
   (into [] (.estimateRegressionParameters m)))
 
@@ -37,6 +37,9 @@
        XtY (times Xt Y)]
        (times (inv XtX) XtY)))
 
+;;TODO: should we pull this out of matrix form with from-matrix and flatten?
+;;>[[60.34103261134334] [60.34103261134334]] (from-matrix (predict r1 [1.6]))))
+;;>[[60.34103261134334]] (from-matrix (predict r1 [1.6]))))
 (defn predict [B xs]
   (let [X (matrix xs)]
     (times (trans B) X)))
