@@ -118,7 +118,7 @@
   (is (= {0 {2 26858, :missing 19, 0 381741, 1 73516}}
        (confusion-matrix (model-from-maps ex1) (first ex2)))))
 
-(deftest precent-predicted-test
+(deftest recall-test
   (is (=
        {0 (float (/ 605170 (+ 605170 5032 3377)))
         1 (float (/ 3216 (+ 3216 3571 57663)))
@@ -154,89 +154,49 @@
 	 (precision {0 {:missing 11, 2 25078, 1 68131, 0 349474}
 		     1 {:missing 12, 2 257, 1 9752, 0 89783}}))))
 
-(deftest form-eqiv-classes
-  (is (= {1 0, 2 0, 3 0, 4 1, 5 1, 6 1}
-       (equivalence-classes {0 #{1 2 3}, 1 #{4 5 6}}))))
+(def ex1 [{:missing {2 33, 1 157, 0 882},
+	   0 {:missing 11, 2 20672, 1 56750, 0 293364},
+	   1 {1 9336, 2 3637, 0 46941},
+	   2 {1 1888, 2 736, 0 8287}}
+	  {:missing 1072, 0 370797, 1 59914, 2 10911}])
 
-(deftest merge-into-equivalence-classes-test
-  (let [classes (equivalence-classes {0 #{1 2 3}, 1 #{4 5 6}})
-  all-zero (equivalence-classes {0 #{1 2 3 4 5 6}})]
-  (is (= {1 {0 3, 1 2}
-    0 {0 25, 1 21}
-    :missing {0 1}}
-   (merge-equivalence-classes
-      {1 classes}
-    {1 {0 25},
-     3 {1 21}
-     4 {0 3},
-     6 {1 2}
-     :missing {0 1}})))
-  (is (= {1 {0 5}
-    0 {0 46}
-    :missing {0 1}}
-   (merge-equivalence-classes
-      {1 classes
-       2 all-zero}
-    {1 {0 25},
-     3 {1 21}
-     4 {0 3},
-     6 {1 2}
-     :missing {0 1}})))
-  (is (= {1 {1 {0 3, 1 2}}
-      0 {0 {0 25, 1 21}}}
-     (merge-equivalence-classes
-        {1 classes
-         2 classes}
-      {1 {0 {0 25}},
-       3 {1 {1 21}}
-       4 {4 {0 3}},
-       6 {6 {1 2}}})))))
+(def ex2 [{2 {:missing 14, 1 2704, 2 2054, 0 13924},
+	   :missing {2 20, 1 65, 0 429},
+	   0 {:missing 5, 2 21107, 1 61157, 0 316896},
+	   1 {2 3677, 1 9590, 0 50492}}
+	  {2 18696, :missing 514, 0 399165, 1 63759}])
 
-(deftest heterogenious-depth-merge-classes
-  (let [classes (equivalence-classes {0 #{1 2 3}, 1 #{4 5 6}})]
-  (is (= {2 {1 {0 3, 1 2}}
-      0 {0 46}
-    :override 10}
-     (merge-equivalence-classes
-        {1 (equivalence-classes {:override #{0} 0 #{1 2}, 1 #{3}, 2 #{4 5 6 7}})
-         2 classes}
-      {0 10,
-     1 {0 25},
-       2 {1 21},
-       4 {4 {0 3}},
-       6 {6 {1 2}}})))))
+(def ex3 [{2 {1 1029, 0 1971, 2 2207},
+	   0 {:missing 18, 1 37978, 2 12701, 0 192261},
+	   :missing {2 461, 1 1352, 0 8517},
+	   1 {1 3828, 0 2545, 2 1595}}
+	  {2 5207, 0 242958, :missing 10330, 1 7968}])
 
-(def ex1 [{:missing {2 33, 1 157, 0 882}, 0 {:missing 11, 2 20672, 1 56750, 0 293364}, 1 {1 9336, 2 3637, 0 46941}, 2 {1 1888, 2 736, 0 8287}} {:missing 1072, 0 370797, 1 59914, 2 10911}])
-
-(def ex2 [{2 {:missing 14, 1 2704, 2 2054, 0 13924}, :missing {2 20, 1 65, 0 429}, 0 {:missing 5, 2 21107, 1 61157, 0 316896}, 1 {2 3677, 1 9590, 0 50492}} {2 18696, :missing 514, 0 399165, 1 63759}])
-
-(deftest compute-matrix-from-count-maps
-  (is (= {0 {:missing 11, 2 25078, 1 68131, 0 349474}}
-   (confusion-matrix-from-counts ex1 ex2)))
-  (is (= {0 {:missing 11, 2 25078, 1 68131, 0 349474}}
-   (confusion-matrix-from-counts ex1 ex2 ex2 ex2 ex2))))
-
-(def ex3 [{2 {1 1029, 0 1971, 2 2207}, 0 {:missing 18, 1 37978, 2 12701, 0 192261}, :missing {2 461, 1 1352, 0 8517}, 1 {1 3828, 0 2545, 2 1595}} {2 5207, 0 242958, :missing 10330, 1 7968}])
-
-(def ex4 [{0 {:missing 11, 0 208075, 2 12284, 1 39876}, :missing {2 376, 1 1032, 0 7624}, 2 {1 1151, 2 2346, 0 2233}, 1 {2 1788, 1 4305, 0 3280}} {0 260246, :missing 9032, 2 5730, 1 9373}])
+(def ex4 [{0 {:missing 11, 0 208075, 2 12284, 1 39876},
+	   :missing {2 376, 1 1032, 0 7624},
+	   2 {1 1151, 2 2346, 0 2233},
+	   1 {2 1788, 1 4305, 0 3280}}
+	  {0 260246, :missing 9032, 2 5730, 1 9373}])
 
 (deftest cross-validate-merges-matrices
-  (is (=
-       (deep-merge-with +
-      (confusion-matrix-from-counts ex3 ex4)
-      (confusion-matrix-from-counts ex4 ex3))
-       (cross-validation-confusion-matrix ex3 ex4))))
+  (is (= {0 {:missing 29, 1 80238, 2 25822, 0 416477},
+	  1 {1 8133, 0 5825, 2 3383},
+	  2 {1 2180, 0 4204, 2 4553}}
+       (cross-validation-confusion-matrix [ex3 ex4]))))
 
-(deftest merge-counts-tests
-  (is (=
-       {0 {0 65955, 1 28369, 2 19051},
-  1 {0 71152, 1 12174, 2 3240}}
+(def exs1 [{2 {1 102, 0 197, 2 220},
+	   0 {:missing 18, 1 379, 2 127, 0 192},
+	   :missing {2 46, 1 135, 0 85},
+	   1 {1 382, 0 254, 2 159}}
+	  {2 220, 0 242, :missing 103, 1 79}])
 
-       (merge-counts
-  {0 {0 {0 62569, 1 3280, 2 106},
-      1 {0 2403, 1 24828, 2 1138},
-      2 {0 6, 1 712, 2 18333}},
-   1
-   {0 {0 69000, 1 2110, 2 42},
-    1 {0 1551, 1 10382, 2 241},
-    2 {0 7, 1 217, 2 3016}}}))))
+(def exs2 [{0 {:missing 11, 0 208, 2 122, 1 39},
+	   :missing {2 37, 1 103, 0 76},
+	   2 {1 115, 2 234, 0 223},
+	   1 {2 17, 1 43, 0 32}}
+	  {0 260, :missing 90, 2 57, 1 93}])
+
+(deftest cross-validate-a-linear-model
+  (is (= {0 {2 508, 1 1081, 0 876},
+	  1 {2 454, 0 420, 1 217}}
+       (cross-validation-linear-model [exs1 exs2]))))

@@ -4,6 +4,8 @@
 
    Classifiers are maps of classifier-name -> functions, data are maps of
    feature-name features."
+  (:use infer.features)
+  (:use infer.linear-models)
   (:use [clojure.contrib.seq-utils :only [flatten]])
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
   (:use [infer.core :only [safe threshold-to map-map levels-deep all-keys]])
@@ -53,62 +55,6 @@
   [transformer classifier count-all]
   (fn [obs] (count-all (map classifier (transformer obs)))))
 
-(defn heterogenious-group-by
-  "Returns a sorted map of the elements of coll keyed by the result of
-   f on each element. The value at each key will be a vector of the
-   corresponding elements, in the order they appeared in coll."
-  [f coll]
-  (reduce
-   (fn [ret x]
-     (let [k (f x)]
-       (assoc ret k (conj (get ret k []) x))))
-   {} coll))
-
-(defn equivalence-classes
-  "Takes a map where key is class and value is a set of equivalence classes to
-   the key class.  it then inverts the mapping so that you can look up classes
-   that are equivalence classes of a new larger class.
-  
-   => (equivalence-classes {0 #{0 1}, 1 #{2, 3, 4}, 2 #{5 6}})
-   {0 0, 1 0, 2 1, 3 1, 4 1, 5 2, 6 2}"
-  [class-mappings]
-  (into {} (for [[k v] class-mappings]
-    (into {} (for [equiv v] [equiv k])))))
-
-(defn merge-levels
-  [class-mappings coll]
-  (map-map
-    #(apply deep-merge-with + (map second %))
-    (heterogenious-group-by
-      (fn [[k v]]
-        (if-let [new-key (class-mappings k)]
-          new-key
-          k))
-      coll)))
-
-(defn merge-equivalence-classes
-  "(defn merge-classes-time-before-dep [model]
-    \"take in [[{modelcounts} {totalcounts}] [{} {}]]\"
-    ; starting with 2 becasue 1 is the first slot, which is time before
-    ; departure for the metrics
-    (let [model-merger {2 bucket-eq-classes
-            3 bucket-eq-classes
-            6 bucket-eq-classes}
-    count-merger {2 bucket-eq-classes
-            3 bucket-eq-classes}]
-    (map (fn [[modelcnts totalcnts]] [(merge-equivalence-classes model-merger modelcnts)
-              (merge-equivalence-classes count-merger totalcnts)]) model)))"
-  [class-mappings x]
-  (letfn [(merger [coll levels]
-        (let [merged (merge-levels (if-let [mapping (class-mappings levels)]
-             mapping
-             identity) coll)]
-          (into {} (for [[k v] merged]
-         (if (not (map? v))
-           [k v]
-           [k (merger v (+ 1 levels))])))))]
-    (merger x 1)))
-
 (defn probs-only
   "Compute probability from computed counts.
    This is division, you have to count up the proper numerator and denominator
@@ -132,18 +78,19 @@
   [prob-map]
   (process-prob-map prob-map probs-only))
 
+(defn invert-map [m]
+  (into {}
+	(map (comp vec reverse) m)))
+	
 (defn most-likely
   "Computes the most likely class from a map of classes to class probability.
 
    => (most-likely {:a 0.6 :b 0.4})
    :a"
   [m]
-  (let [[k v] (reduce
-      (fn [[k1 v1][k2 v2]]
-        (if (> v1 v2)
-    [k1 v1]
-    [k2 v2]))
-      m)] k))
+  (let [imap (invert-map m)
+	likely-class (apply max (keys imap))]
+    (imap likely-class)))
 
 (defn confusion-matrix
   "Computes a confusion matrix from the counts on train and test data sets
@@ -152,19 +99,27 @@
    single key of the predicted"
   [trd tst]
   (apply deep-merge-with +
-   (flatten
-    ((fn each-level [tr ts]
-       (for [[k v] ts
-       :let [it (tr k)
-       can-predict (not (nil? it))]]
-         (if (= 1 (levels-deep v))
-     (if can-predict
-       {(most-likely it) v}
-       {:no-prediction v})
-     (if can-predict
-       (each-level it v)
-       (each-level {} v)))))
-     trd tst))))
+	 (flatten
+	  ((fn each-level [tr ts]
+	     (for [[k v] ts
+		   :let [it (tr k)
+			 can-predict (not (nil? it))]]
+	       (if (= 1 (levels-deep v))
+		 (if can-predict
+		   {(most-likely it) v}
+		   {:no-prediction v})
+		 (if can-predict
+		   (each-level it v)
+		   (each-level {} v)))))
+	   trd tst))))
+
+(defn linear-model-confusion-matrix
+  [trd tst]
+  (let [score (fn [ts]
+		{(trd (vec-but-last ts))
+		 {(vec-last ts) 1}})]
+  (apply deep-merge-with +
+	 (map score tst))))
 
 (defn precision
   "Computes precision by class label from confusion matrix."
@@ -192,91 +147,68 @@
               (threshold-to 0
                 (v-actual k))))))))])))
 
-(defn confusion-matrix-from-counts
-  "Produces a confusion matrix from teh joint distributions of test and train
-   data. Right now the tests and train data are con-prob-tuples this may change
-   if we store only the joint PMFs."
-  [test & train]
-  (confusion-matrix
-   (model-from-maps
-    (reduce +cond-prob-tuples train))
-    (first test)))  ;;only needs first part of count matrix, which si the jpoint distribution.
+;;http://en.wikipedia.org/wiki/Cross-validation_(statistics)
+;;TODO: n*k fold
+;;leave one out cross validation
+;;extra hold out testing?
+;;easily M/R-able if needed for some models.
+(defn cross-validate
+  "takes a model, a training/optimization algorithm, a fitness/loss function.
+
+Lastly, takes n seqs of input-output vectors (or feature-target if that's how you roll) to be used as training and test examples.
+
+holds each seq of vectors out in turn as the test set, merges the rest as training, and performs n-way cross-validation.
+
+TODO: for now you are left on your own to aggregate the losses after the fn returns, should we parameterize teh aggregator as well?
+"
+  [model train fitness examples]
+    (pmap
+     (fn [test-set]
+      (let [training-set (remove #{test-set} examples)
+	    trained (train model training-set)]
+	(fitness trained test-set)))
+	 examples))
+
+(defn to-pmf [model training-set]
+   (model
+    (reduce +cond-prob-tuples training-set)))
+
+(defn to-linear-model [model training-set]
+   (apply
+    model
+    (extract-ys
+     (apply concat training-set))))
 
 (defn cross-validation-confusion-matrix
   "Takes a set of n joint PMFs, and holds each joint PMF out in turn as the test
    set. Merges the resulting n cross-validation matrices into a single matrix."
-  [& xs]
+  [xs]
   (apply deep-merge-with +
-    (for [x xs]
-      (apply
-       confusion-matrix-from-counts
-         x (remove #{x} xs)))))
+    (cross-validate
+     model-from-maps
+     to-pmf
+     #(confusion-matrix %1 (first %2))
+     xs)))
+
+(defn cross-validation-linear-model
+  [xs]
+  (let [feature-vecs (map (comp
+			   #(feature-vectors % missing-smoother)
+			   first)
+			  xs)]
+    (apply deep-merge-with +
+	   (cross-validate
+	    (fn [x y]
+	      (bucket #(predict
+			(ols-linear-model x y)
+			%)
+		      [0 1 2 3]))
+	      to-linear-model
+	      linear-model-confusion-matrix
+	      feature-vecs))))
 
 (defn n-times-k-fold-cross-validation-confusion-matrix
   [list-of-lists]
   (apply deep-merge-with +
   (map (partial apply cross-validation-confusion-matrix)
        list-of-lists)))
-
-(defn map-of-vectors
-  [keys]
-  (into {}
-        (map (fn [k] [k []]) keys)))
-
-(defn vectorize
-  [maps]
-  (map-of-vectors (all-keys maps)))
-
-(defn collect-vals
-  [maps]
-  "=> (collect-vals [{:a 1 :b 2} {:a 4 :b 5} {:c 4} {:c 5}])
-   {:b [2 5], :c [4 5], :a [1 4]}"
-  (apply merge-with conj
-    (cons (vectorize maps) maps)))
-
-(defn prob-map-tuples-by-time
-  "Use to transform data for confusion matrix by time before departure"
-  [prob-map-tuple]
-  (into {}
-    (for [[k v] (first prob-map-tuple)]
-      [k [v ((second prob-map-tuple) k)]])))
-
-(defn confusion-matrix-by-time
-  [results]
-  (let [results-by-time (collect-vals
-       (map prob-map-tuples-by-time results))]
-    (into {}
-    (for [[k v] results-by-time]
-      [k (apply cross-validation-confusion-matrix v)]))))
-
-;;stuff for looking at precision and recall at time-before-prediction.
-
-;;todo: these below are hardcoded to certian levels of depth
-(defn merge-counts [x]
-  (into {}
-  (for [[k v] x]
-    [k (into {}
-       (for [[pk pv] v]
-         [pk (apply + (vals pv))]))])))
-
-;;TODO: not really recall - what to call this?
-(defn recall-by-time [confustion-matrix]
-  (let [merged (merge-counts confustion-matrix)
-  totals (apply merge-with +
-          (vals merged))]
-    (into {}
-    (for [[k v] merged]
-      [k
-      (into {}
-      (for [[predicted count] v]
-      [predicted (float (/ count (totals predicted)))]))]))))
-
-(defn percent-of-total-predictions-by-time [counts]
-  (let [totals (apply merge-with +
-          (vals counts))]
-    (into {}
-    (for [[k v] counts]
-      [k
-      (into {}
-      (for [[predicted count] v]
-      [predicted (float (/ count (totals predicted)))]))]))))
