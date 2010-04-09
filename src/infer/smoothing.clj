@@ -21,11 +21,10 @@
  (abs (- x1 x2)))
 
 (defn euclid-query [point dist] 
-  (if (number? point)
-    #(<= (one-d-distance point %) dist)
     #(<= (euclidean-distance point %)
-	 dist)))
+	 dist))
 
+;;TODO: point-space queries don't include distance in the y dimension.
 (defn rectangle-query [point lengths]
 "Like manhattan distance but different in that rather than specifying a query for points as a region defined by a distance as a radius in some metric space, it specifies a regious as a hyper-rectangle by leting a vector of lenghts represent the bounds around the point."
   (fn [xys]
@@ -43,17 +42,21 @@
 (defn nearest-neighbors [k point dist coll]
   (take k
 	(sort-by 
-	 #(dist point (first %))
+	 #(dist point (vec-but-last %))
 	 coll)))
 
 (defn within-region [pred coll]
-  (filter (comp pred first) coll))
+  (filter (comp pred vec-but-last) coll))
 
+;;TODO: create an explict format for xs vs. ys in feature vecs?  linear models split xs & ys into different inputs, if they are in the same feature vectors, then how do we divide - especailly for multi-y or multi-class outputs.
+;;here we assume that there is y.
 (defn single-class? [points]
-  (number? (second (first points))))
+  (number? (last (first points))))
 
 ;;inverse is a common nn weighing function, but not technicly a kernel.
-(defn inverse [d] (/ 1 d))
+(defn inverse [d] 
+  (if (= 0 d) Double/POSITIVE_INFINITY
+      (/ 1 d)))
 
 ;;Kernel weighing functions
 ;;http://en.wikipedia.org/wiki/Kernel_(statistics)
@@ -90,11 +93,11 @@
 
 (defn mean-output [points]
     (if (single-class? points)
-      (mean (map second points))
-      (map mean (seq-trans (map second points)))))
+      (mean (map vec-last points))
+      (map mean (seq-trans (map vec-last points)))))
 
 (defn weights [point weigh points]
-  (map #(weigh point (first %)) points))
+  (map #(weigh point (vec-but-last %)) points))
 
 ;;kernel regression
 ;;http://en.wikipedia.org/wiki/Kernel_regression
@@ -115,13 +118,25 @@ http://en.wikipedia.org/wiki/Kernel_regression#Nadaraya-Watson_kernel_regression
 	divisor (sum weights*)]
     (if (single-class? points)
 	(/
-	 (weighted-sum (map second points) weights*)
+	 (weighted-sum (map vec-last points) weights*)
 	 divisor)
         (map #(/ % divisor)
 	     (map #(weighted-sum % weights*)
-		  (seq-trans (map second points)))))))
+		  (seq-trans (map vec-last points)))))))
 
 ;;TODO: other kernel estimators?
 ;;Priestley-Chao kernel estimator
 ;;Gasser-Müller kernel estimator
 ;;http://en.wikipedia.org/wiki/Kernel_regression
+
+;;TODO: top level api exploration
+(defn smoother [query weigh data]
+  (fn [x]
+    (nadaraya-watson-estimator
+     x weigh (query x data))))
+
+(defn knn-smoother [k data]
+  (smoother #(nearest-neighbors k (vec-but-last %1)
+				euclidean-distance %2)
+	    (comp inverse euclidean-distance)
+	    data))

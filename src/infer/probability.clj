@@ -83,24 +83,6 @@
        (recur (apply deep-merge-with + (vals jx))
          (conj marginals  (summate-level jx))))) j []))
 
-
-;;TODO: in progress.  meditating on the simplest implimentation
-;;this is process is called "marginalization" or how to marginalize out an arbitary variable from a joint distribution, leaving a joint distribution of a sebset of the variables.
-;; (defn subjoint
-;; "
-;; computes a joint PMF for a subset of variables in the given larger joint PMF.
-
-;; of the form:   {a {b n}} where n is the nubmer of co-occurances of a and b.
-
-;; "
-;; [j ps]
-;; ((fn [jx level]
-;;    (let [nxt (if (contains? ps level)
-;;             jx
-;;             (apply deep-merge-with + (vals jx)))]
-;;   (recur next (+ 1 level))))
-;;  j 0))
-
 (defn n-sided-die
   [#^Integer n]
   (apply hash-map

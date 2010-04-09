@@ -127,17 +127,6 @@
     (is (= [{1 16, 2 27} {1 18, 2 25} {5 6, 7 8, 4 7, 3 6, 1 7, 2 9}]
      (marginals independent-joint)))))
 
-;; (deftest extract-subjoint-from-joint
-;;   (let [independent-joint
-;;  {1 {1 {1 2, 2 3}
-;;      2 {1 5, 2 6}}
-;;   2 {1 {3 6, 4 7}
-;;      2 {5 6, 7 8}}}]
-;;     (is (= {1 {4 7, 3 6, 1 2, 2 3},
-;;       2 {7 8, 5 6, 1 5, 2 6}}
-;;     (subjoint independent-joint [1 2])))))
-
-
 ;;TODO: hacked in here for the time being, should be killed and removed fromtests or supported as first class temporal concept.
 (defn present [k] #(k (second %)))
 (defn previous [k] #(k (first %)))

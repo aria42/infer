@@ -5,6 +5,28 @@
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
   (:use clojure.set))
 
+(defn nth-is? [i pred coll]
+  (pred (nth coll i)))
+
+(defn count-when [pred coll]
+  (count (filter pred coll)))
+              
+(defn vec-but-last [s]
+  (subvec s 0 
+	  (max 0 (- (count s) 1))))
+
+(defn vec-last [s]
+  (nth s (- (count s) 1)))
+
+(defn rest-vec [v i]
+ (if (> i (- (count v) 1))
+   nil
+  (subvec v i)))
+
+(defn remove-at [i v]
+  (concat (subvec v 0 i)
+	  (subvec v (+ i 1) (count v))))
+
 (defn heterogenious-group-by
   "Returns a sorted map of the elements of coll keyed by the result of
    f on each element. The value at each key will be a vector of the
@@ -83,33 +105,46 @@
   ([m]
      (feature-vectors m identity)))
 
+(defn into-nested-map [v]
+  (let [rv (vec (reverse v))
+	mapize (fn [m restks]
+		 (if (not restks) m
+		     (recur {(first restks) m}
+			    (rest-vec restks 1))))]
+    (mapize {(second rv) (first rv)} (rest-vec rv 2))))
+
+(defn map-from-vectors
+"turns the feature vectors back into a nested map representation."
+[vecs]
+(apply deep-merge-with +
+       (map into-nested-map vecs)))
+
 (defn vectors-as-keys
-"transforms the nested map representation into a vector-as-key with count-as-value representation."
+  "transforms the nested map representation into a vector-as-key with count-as-value representation."
   ([vect m]
-      (for [[k v] m
-	    :let [next-vect (conj vect k)]]
-        (cond (number? v)
-	  (conj next-vect v)
-	  :otherwise
-	  (vectors-as-keys next-vect v))))
-  ([m] (flatten-seqs (vectors-as-keys [] m))))
+     (for [[k v] m
+	   :let [next-vect (conj vect k)]]
+       (cond (number? v)
+	     (conj next-vect v)
+	     :otherwise
+	     (vectors-as-keys next-vect v))))
+  ([m] (into {}
+	     (map #(vector
+		    (vec-but-last %)
+		    (vec-last %))
+		  (flatten-seqs
+		   (vectors-as-keys [] m))))))
 
-(defn remove-at [i v]
-  (concat (subvec v 0 i)
-	  (subvec v (+ i 1) (count v))))
+(defn marginalize [i vec-of-vecs]
+  (map
+   #(remove-at i %)
+   vec-of-vecs))
 
-(defn nth-is? [i pred coll]
-  (pred (nth coll i)))
-
-(defn count-when [pred coll]
-  (count (filter pred coll)))
-              
-(defn vec-but-last [s]
-  (subvec s 0 
-	  (max 0 (- (count s) 1))))
-
-(defn vec-last [s]
-  (nth s (- (count s) 1)))
+(defn marginalize-counts [i vec-count-map]
+  (merge-with +
+	      (map
+	       (fn [[k v]] {(remove-at i k) v})
+	       vec-count-map)))
 
 (defn extract-ys [vs]
   [(pmap vec-last vs)

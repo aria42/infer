@@ -200,3 +200,13 @@
   (is (= {0 {2 508, 1 1081, 0 876},
 	  1 {2 454, 0 420, 1 217}}
        (cross-validation-linear-model [exs1 exs2]))))
+
+;;TODO: doublecheck lingpipe api.
+;; (deftest cross-validate-a-logistic-regression-model
+;;   (is (= {0 {2 508, 1 1081, 0 876},
+;; 	  1 {2 454, 0 420, 1 217}}
+;;        (cross-validation-logistic-regression [exs1 exs2]))))
+
+;; (deftest cross-validate-smoothing
+;;   (is (= {0 {2 962, 0 1296, 1 1298}}
+;;        (cross-validation-kernel-smoother [exs1 exs2]))))

@@ -5,6 +5,8 @@
    Classifiers are maps of classifier-name -> functions, data are maps of
    feature-name features."
   (:use infer.features)
+  (:use infer.weka-spike)
+  (:use infer.smoothing)
   (:use infer.linear-models)
   (:use [clojure.contrib.seq-utils :only [flatten]])
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
@@ -88,7 +90,9 @@
    => (most-likely {:a 0.6 :b 0.4})
    :a"
   [m]
-  (let [imap (invert-map m)
+  (let [imap (if (map? m)
+	       (invert-map m)
+	       (zipmap m (range 0 (count m))))
 	likely-class (apply max (keys imap))]
     (imap likely-class)))
 
@@ -117,6 +121,14 @@
   [trd tst]
   (let [score (fn [ts]
 		{(trd (vec-but-last ts))
+		 {(vec-last ts) 1}})]
+  (apply deep-merge-with +
+	 (map score tst))))
+
+(defn nn-confusion-matrix
+  [trd tst]
+  (let [score (fn [ts]
+		{(trd ts)
 		 {(vec-last ts) 1}})]
   (apply deep-merge-with +
 	 (map score tst))))
@@ -179,6 +191,10 @@ TODO: for now you are left on your own to aggregate the losses after the fn retu
     (extract-ys
      (apply concat training-set))))
 
+(defn to-nn-model [model training-set]
+   (model
+     (apply concat training-set)))
+
 (defn cross-validation-confusion-matrix
   "Takes a set of n joint PMFs, and holds each joint PMF out in turn as the test
    set. Merges the resulting n cross-validation matrices into a single matrix."
@@ -205,6 +221,38 @@ TODO: for now you are left on your own to aggregate the losses after the fn retu
 		      [0 1 2 3]))
 	      to-linear-model
 	      linear-model-confusion-matrix
+	      feature-vecs))))
+
+(defn cross-validation-logistic-regression
+  [xs]
+  (let [feature-vecs (map (comp
+			   #(feature-vectors % missing-smoother)
+			   first)
+			  xs)]
+    (apply deep-merge-with +
+	   (cross-validate
+	    (fn [x y]
+	      (bucket #(classify
+			(logistic-regression x y)
+			%)
+		      [0 1 2 3]))
+	      to-linear-model
+	      linear-model-confusion-matrix
+	      feature-vecs))))
+
+(defn cross-validation-kernel-smoother
+  [xs]
+  (let [feature-vecs (map (comp
+			   #(feature-vectors % missing-smoother)
+			   first)
+			  xs)]
+    (apply deep-merge-with +
+	   (cross-validate
+	    (fn [vecs]
+	      (bucket (knn-smoother 10 vecs)
+		      [0 1 2 3]))
+	      to-nn-model
+	      nn-confusion-matrix
 	      feature-vecs))))
 
 (defn n-times-k-fold-cross-validation-confusion-matrix
