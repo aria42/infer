@@ -33,7 +33,7 @@
 	(is (= a b))))
 
 (deftest identity-matrix
-  (let [i (from-matrix (I [2 2]))]
+  (let [i (from-matrix (I 2 2))]
 	(is (= [[1 0]
 		[0 1]]
 	       i))))

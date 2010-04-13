@@ -57,3 +57,16 @@
 
 (defn weighted-linear-model [ys xs weights]
   (gls-linear-model ys xs (to-diag weights)))
+
+;;http://en.wikipedia.org/wiki/Tikhonov_regularization
+;;TODO: use approaches in article above or cross validation for selecting lambda.
+;;TODO: maybe rename all "linear-model"s above to be "regression" for api consistency? 
+(defn ridge-regression [ys xs lambda]
+ (let [X (matrix xs)
+       Y (matrix ys)
+       p (column-count X)
+       Xt (trans X)
+       XtX (times Xt X)
+       penalty (times (I p p) lambda)
+       XtY (times Xt Y)]
+       (times (inv (plus XtX penalty)) XtY)))

@@ -43,7 +43,7 @@
 
 (defn I
 "identity matrix"
-[dimensions] (MatrixFactory/eye (long-array dimensions)))
+[& dimensions] (MatrixFactory/eye (long-array dimensions)))
 
 (defn rand-elems
   ([n]
@@ -84,8 +84,16 @@
 	     r c)
      m))
 
-(defn times [#^DenseDoubleMatrix2D A #^DenseDoubleMatrix2D B]
-  (.mtimes A B))
+;;TODO: abstract general pattern for calling these operations on the underlying matrix object
+(defn times [#^DenseDoubleMatrix2D A B]
+  (if (isa? (class B) DenseDoubleMatrix2D)
+  (.mtimes A #^DenseDoubleMatrix2D B)
+  (.mtimes A #^Double (double B))))
+
+(defn plus [#^DenseDoubleMatrix2D A B]
+  (if (isa? (class B) DenseDoubleMatrix2D)
+  (.plus A #^DenseDoubleMatrix2D B)
+  (.plus A #^Double (double B))))
 
 (defn trans [#^DenseDoubleMatrix2D A]
   (.transpose A))
@@ -98,3 +106,9 @@
 
 (defn inv [#^DenseDoubleMatrix2D A]
   (.inv A))
+
+(defn column-count [#^DenseDoubleMatrix2D A]
+  (.getColumnCount A))
+
+(defn row-count [#^DenseDoubleMatrix2D A]
+  (.getRowCount A))

@@ -60,7 +60,7 @@
 (deftest gls-regression-tests
   (let [n (count weight)
 	bs (gls-linear-model
-	    weight height (I [n n]))
+	    weight height (I n n))
 	bs2 (commons-gls-linear-model
 	    weight height (to-diag (repeat n 1)))]
     (is (= [[37.713145382089586]] (from-matrix bs)))
@@ -77,3 +77,9 @@
     (is (= [[37.713145382089586]] (from-matrix bs)))
     (is (= [[36.56120274286958]] (from-matrix bs2)))
     (is (= [36.561202742869575] (commons-betas bs3)))))
+
+(deftest ridge-regression-tests
+  (let [n (count weight)
+	bs2 (ridge-regression
+	    weight height 2)]
+    (is (= [[35.96121310378788]] (from-matrix bs2)))))
