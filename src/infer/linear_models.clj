@@ -2,6 +2,7 @@
   (:import [org.apache.commons.math.stat.regression
 	    OLSMultipleLinearRegression
 	    GLSMultipleLinearRegression])
+  (:use infer.probability)
   (:use infer.matrix))
 
 (defn vecize-1d
@@ -31,10 +32,9 @@
 
 (defn ols-linear-model [ys xs]
  (let [X (matrix xs)
-       Y (matrix ys)
        Xt (trans X)
        XtX (times Xt X)
-       XtY (times Xt Y)]
+       XtY (times Xt (matrix ys))]
        (times (inv XtX) XtY)))
 
 ;;TODO: should we pull this out of matrix form with from-matrix and flatten?
@@ -43,6 +43,11 @@
 (defn predict [B xs]
   (let [X (matrix xs)]
     (times (trans B) X)))
+
+(defn classify [B xs classes]
+  (range-classifier classes
+;;TODO: hardcoded for single label, single prediction
+		    (first (first (from-matrix (predict B xs))))))
 
 (defn gls-linear-model [ys xs sigma]
  (let [X (matrix xs)

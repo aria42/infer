@@ -107,6 +107,7 @@
 (defn bucket-negative? [x]
   (if (pos? x) false :negative))
 
+;;TODO: rename to discretizing and collect with other discretizing
 (defn range-classifier
   "Classify one item based on what interval in a range the item falls into."
   [range item]

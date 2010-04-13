@@ -1,6 +1,8 @@
 (ns infer.features
+  (:import java.util.Random)
   (:use clojure.contrib.combinatorics)
   (:use clojure.contrib.seq-utils)
+  (:use infer.measures)
   (:use [infer.core :only [map-map]])
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
   (:use clojure.set))
@@ -8,8 +10,13 @@
 (defn nth-is? [i pred coll]
   (pred (nth coll i)))
 
+;;confusing names - this one takes a vec of feature-vectors and sums the # of examples passing the pred
 (defn count-when [pred coll]
   (count (filter pred coll)))
+
+;;confusing names - this one takes a map of feature-vectors -> counts, and sums all the counts whose feature-vector-key passes the pred
+(defn counts-when [pred coll]
+  (sum (vals (filter (comp pred first) coll))))
               
 (defn vec-but-last [s]
   (subvec s 0 
@@ -104,6 +111,11 @@
      (flatten-seqs (feature-vectors [] m smoother)))
   ([m]
      (feature-vectors m identity)))
+
+(defn downsample [sample-percent coll]
+     (let [ra (Random.)]
+       (filter (fn [x] (< (.nextDouble ra)
+			  sample-percent)) coll)))
 
 (defn into-nested-map [v]
   (let [rv (vec (reverse v))

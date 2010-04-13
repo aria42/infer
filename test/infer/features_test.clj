@@ -86,6 +86,25 @@
   (is (= 0 
 	 (count-when
 	  (fn [c] (not (some #(> % 0) c)))
+	  data)))
+  (is (= 4
+	 (count-when
+	  (fn [c] (some #(> % 0) c))
+	  data)))))
+
+(deftest counts-when-test
+  (let [data {[0 6 0 2 4] 4
+	      [0 6 0 2 3] 3
+	      [0 6 0 2 2] 2 
+	      [0 6 0 2 1] 1}]
+    
+  (is (= 7
+	 (counts-when
+	  (partial nth-is? 4 #(> % 2))
+	  data)))
+  (is (= 3
+	 (counts-when
+	  (partial nth-is? 4 #(< % 3))
 	  data)))))
 
 (deftest make-feature-vectors
@@ -132,4 +151,16 @@
 	[0 1 2 1]
 	[0 1 2 1]
 	[0 1 2 1]
-	[0 2 1 1]]))))
+	[0 2 1 1]])))
+  (is (= {0 {1 {2 3}}}
+	 (map-from-vectors [[0 1 2 3]]))))
+
+;; (defn marginalize-m [n m]
+;;   (map-from-vectors
+;;    (map conj
+;; 	(marginalize-counts n (vectors-as-keys m)))))
+
+;; (deftest marginalize-m-test
+;;   (is (= {}
+;; 	 (marginalize-m 2
+;; 			{0 {1 {2 2}}}))))
