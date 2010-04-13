@@ -56,28 +56,25 @@
   [transformer classifier count-all]
   (fn [obs] (count-all (map classifier (transformer obs)))))
 
+(defn map-as-matrix [m]
+  (let [ordered (map sort (vals (sort m)))]
+	(map (comp vec vals) ordered)))
+
+(defn real-precision [confusion-matrix]
+  (map (fn [v i]
+	 (/ (nth v i)
+	    (apply + v)))
+       confusion-matrix
+       (range 0 (count confusion-matrix))))
+
 (defn precision
   "Computes precision by class label from confusion matrix."
   [m]
-  (into {}
-  (for [[k v] m
-        :let [predicted (v k)]
-        :when (not (= k :no-prediction))]
-    [k (float (/ (if predicted predicted 0)
-    (apply + (vals v))))])))
+  (let [to-vecs (map-as-matrix m)]
+    (real-precision to-vecs)))
 
 (defn recall
   "Computes recall by class label from confusion matrix."
   [m]
-  (into {}
-  (for [k (all-keys m)
-        :let [v-predicted (m k)]
-        :when (not (or (= k :missing)
-           (= k :no-prediction)))]
-    [k
-     (if (not v-predicted) 0
-         (let [the-prediction (v-predicted k)]
-     (float (/ (if the-prediction the-prediction 0)
-         (apply + (for [[k-actual v-actual] m]
-              (threshold-to 0
-                (v-actual k))))))))])))
+  (let [to-vecs (seq-trans (map-as-matrix m))]
+    (real-precision to-vecs)))

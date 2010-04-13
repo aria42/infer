@@ -6,6 +6,7 @@
 	    Ops])
   (:import [org.ujmp.core.matrix Matrix2D])
   (:import [org.ujmp.core.doublematrix DenseDoubleMatrix2D DoubleMatrix2D])
+  (:import org.ujmp.core.calculation.Calculation$Ret)
   (:import org.ujmp.core.doublematrix.calculation.general.decomposition.Chol))
 
 (defn ensure-vecs [xs]
@@ -112,3 +113,15 @@
 
 (defn row-count [#^DenseDoubleMatrix2D A]
   (.getRowCount A))
+
+(def link-to-matrix Calculation$Ret/LINK)
+(def new-matrix Calculation$Ret/NEW)
+(def orig-matrix Calculation$Ret/ORIG)
+
+(defn delete-rows
+[#^DenseDoubleMatrix2D A rows]
+  (.deleteRows A new-matrix (long-array rows)))
+
+(defn delete-columns 
+[#^DenseDoubleMatrix2D A columns]
+  (.deleteColumns A new-matrix (long-array columns)))

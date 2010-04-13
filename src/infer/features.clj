@@ -135,17 +135,6 @@
 		  (flatten-seqs
 		   (vectors-as-keys [] m))))))
 
-(defn marginalize [i vec-of-vecs]
-  (map
-   #(remove-at i %)
-   vec-of-vecs))
-
-(defn marginalize-counts [i vec-count-map]
-  (merge-with +
-	      (map
-	       (fn [[k v]] {(remove-at i k) v})
-	       vec-count-map)))
-
 (defn extract-ys [vs]
   [(pmap vec-last vs)
    (pmap vec-but-last vs)])
