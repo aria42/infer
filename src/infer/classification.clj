@@ -5,7 +5,6 @@
    Classifiers are maps of classifier-name -> functions, data are maps of
    feature-name features."
   (:use infer.features)
-  (:use infer.weka-spike)
   (:use infer.smoothing)
   (:use infer.linear-models)
   (:use [clojure.contrib.seq-utils :only [flatten]])

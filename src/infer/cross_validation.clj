@@ -1,6 +1,5 @@
 (ns infer.cross-validation
   (:use infer.features)
-  (:use infer.weka-spike)
   (:use infer.smoothing)
   (:use infer.linear-models)
   (:use [clojure.contrib.seq-utils :only [flatten]])
@@ -142,23 +141,6 @@ TODO: for now you are left on your own to aggregate the losses after the fn retu
 	    (fn [x y]
 	      (bucket #(predict
 			(ols-linear-model x y)
-			%)
-		      [0 1 2 3]))
-	      to-linear-model
-	      linear-model-confusion-matrix
-	      feature-vecs))))
-
-(defn cross-validation-logistic-regression
-  [xs]
-  (let [feature-vecs (map (comp
-			   #(feature-vectors % missing-smoother)
-			   first)
-			  xs)]
-    (apply deep-merge-with +
-	   (cross-validate
-	    (fn [x y]
-	      (bucket #(classify
-			(logistic-regression x y)
 			%)
 		      [0 1 2 3]))
 	      to-linear-model
