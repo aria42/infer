@@ -1,6 +1,7 @@
 (ns infer.classification-test
   (:use clojure.test)
   (:use infer.classification)
+  (:use infer.cross-validation)
   (:use infer.probability)
   (:use clojure.contrib.map-utils))
 
@@ -196,10 +197,10 @@
 	   1 {2 17, 1 43, 0 32}}
 	  {0 260, :missing 90, 2 57, 1 93}])
 
-(deftest cross-validate-a-linear-model
-  (is (= {0 {2 508, 1 1081, 0 876},
-	  1 {2 454, 0 420, 1 217}}
-       (cross-validation-linear-model [exs1 exs2]))))
+;; (deftest cross-validate-a-linear-model
+;;   (is (= {0 {2 508, 1 1081, 0 876},
+;; 	  1 {2 454, 0 420, 1 217}}
+;;        (cross-validation-linear-model [exs1 exs2]))))
 
 ;;TODO: doublecheck lingpipe api.
 ;; (deftest cross-validate-a-logistic-regression-model
