@@ -67,14 +67,17 @@
        confusion-matrix
        (range 0 (count confusion-matrix))))
 
+(defn real-recall
+  "Computes recall by class label from confusion matrix."
+  [confusion-matrix]
+    (real-precision (seq-trans confusion-matrix)))
+
 (defn precision
   "Computes precision by class label from confusion matrix."
   [m]
-  (let [to-vecs (map-as-matrix m)]
-    (real-precision to-vecs)))
+    (real-precision (map-as-matrix m)))
 
 (defn recall
   "Computes recall by class label from confusion matrix."
   [m]
-  (let [to-vecs (seq-trans (map-as-matrix m))]
-    (real-precision to-vecs)))
+    (real-precision (seq-trans (map-as-matrix m))))

@@ -1,5 +1,6 @@
 (ns infer.features-test
   (:use clojure.test)
+  (:use infer.matrix)
   (:use infer.features))
 
 (deftest form-eqiv-classes
@@ -155,12 +156,22 @@
   (is (= {0 {1 {2 3}}}
 	 (map-from-vectors [[0 1 2 3]]))))
 
-;; (defn marginalize-m [n m]
-;;   (map-from-vectors
-;;    (map conj
-;; 	(marginalize-counts n (vectors-as-keys m)))))
+(deftest feature-into-map
+  (is (= {1 {2 {3 4}}}
+	 (into-nested-map [1 2 3 4]))))
 
-;; (deftest marginalize-m-test
-;;   (is (= {}
-;; 	 (marginalize-m 2
-;; 			{0 {1 {2 2}}}))))
+(deftest marginalize-m-test
+  (is (= [[0 1 2 2]]
+	 (marginalize [2] [[0 1 2 2 2]]))))
+
+(deftest marginalize-m-test
+  (let [example {0 {1 {2 {2 2}}}}]
+    (is (= [[0 1 2 2 2]]
+	 (feature-vectors2 example)))
+  (is (= {0.0 {1.0 {2.0 2.0}}}
+	 (marginalize-map [2] {0 {1 {2 {2 2}}}})))))
+
+(deftest feature-target-mutual-information
+  (is (= [-0.07290559532005605 -0.07290559532005605
+	  -0.07290559532005605 -0.07290559532005605]
+	 (feature-target-mi (I 5 5)))))

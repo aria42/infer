@@ -33,8 +33,8 @@
   (is (=within
        (expt 10 4)
        0.048
-   (gain {:weak {:positive 6 :negative 2}
-    :strong {:positive 3 :negative 3}}))))
+       (gain {:weak {:positive 6 :negative 2}
+	      :strong {:positive 3 :negative 3}}))))
 
 ;;Mutual information quantifies the dependence between the joint distribution of X and Y and what the joint distribution would be if X and Y were independent.
 (deftest mutual-information-tests

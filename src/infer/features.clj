@@ -3,6 +3,9 @@
   (:use clojure.contrib.combinatorics)
   (:use clojure.contrib.seq-utils)
   (:use infer.measures)
+  (:use infer.information-theory)
+  (:use infer.probability)
+  (:use infer.matrix)
   (:use [infer.core :only [map-map]])
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
   (:use clojure.set))
@@ -112,6 +115,20 @@
   ([m]
      (feature-vectors m identity)))
 
+(defn feature-vectors2
+  ([vect m smoother]
+     (pmap (fn [[k v]]
+	    (let [next-vect (conj vect (smoother k))]
+	      (cond (number? v)
+		    (conj next-vect v)
+		    :otherwise
+		    (feature-vectors2 next-vect v smoother))))
+	  m))
+  ([m smoother]
+     (flatten-seqs (feature-vectors2 [] m smoother)))
+  ([m]
+     (feature-vectors2 m identity)))
+
 (defn downsample [sample-percent coll]
      (let [ra (Random.)]
        (filter (fn [x] (< (.nextDouble ra)
@@ -131,6 +148,23 @@
 (apply deep-merge-with +
        (map into-nested-map vecs)))
 
+(defn joint-and-marginals-from-vectors
+[vecs]
+(loop [jm-vec [{}{}{}]
+       splatted (map
+	       #(apply vector
+		 (into-nested-map
+		  (conj % 1))
+		   (map (fn [x] {x 1}) %))
+	       vecs)]
+  (if (empty? splatted) jm-vec
+      (recur
+       (doall (map
+	(fn [agg next]
+	  (deep-merge-with + agg next))
+	jm-vec (first splatted)))
+       (rest splatted)))))
+       
 (defn vectors-as-keys
   "transforms the nested map representation into a vector-as-key with count-as-value representation."
   ([vect m]
@@ -154,3 +188,42 @@
 (defn seq-trans [seqs]
 "transpose a seq of seqs.  useful to transform multi-class output vectors into vectors of outputs for each class."
   (apply map list seqs))
+
+(defn marginalize [indices vecs]
+  (let [A (matrix vecs)]
+	(from-matrix (delete-columns A indices))))
+
+(defn marginalize-vecs [index vecs]
+ (map #(remove-at index %) vecs))
+
+(defn marginalize-map [n m]
+ (map-from-vectors
+	(marginalize n (feature-vectors2 m missing-smoother))))
+
+(defn feature-target-pairs
+([A] (feature-target-pairs A (- (column-count A) 1)))
+([A target]
+    (for [feature (remove (eq target)
+			  (range 0 (column-count A)))]
+      (select-columns A [feature target]))))
+
+(defn feature-target-mi [A]
+  (map (comp
+	#(mutual-information (first %) (rest %))
+	joint-and-marginals-from-vectors
+	from-matrix)
+       (feature-target-pairs A)))
+
+(defn index-of-max [v]
+  (loop [max-v (first v)
+	 max-i 0
+	 i 0
+	 next v]
+    (let [x (first next)
+	  xs (rest next)
+	  next-i (inc i)
+	  new-max (max x max-v)
+	  new-i (if (> new-max max-v) i max-i)]
+    (if (empty? xs)
+      new-i
+      (recur new-max new-i next-i xs)))))

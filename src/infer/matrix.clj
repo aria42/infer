@@ -125,3 +125,11 @@
 (defn delete-columns 
 [#^DenseDoubleMatrix2D A columns]
   (.deleteColumns A new-matrix (long-array columns)))
+
+(defn select-columns
+  [#^DenseDoubleMatrix2D A columns]
+  (.selectColumns A new-matrix columns))
+
+(defn select-rows
+  [#^DenseDoubleMatrix2D A rows]
+  (.selectRows A new-matrix rows))

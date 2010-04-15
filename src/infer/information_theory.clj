@@ -2,6 +2,8 @@
   (:use [infer.probability :only [comb-merge]])
   (:use [infer.core :only [flatten-with log2]]))
 
+;;TODO change hte lib's interface from maps of counts to vectors/matrices of counts.
+
 (defn gini-impurity
   "Gini impurity is  measure of how often a chosen element from the set would be
    incorrectly labelled if it were randomly labelled according to the
