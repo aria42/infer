@@ -2,6 +2,7 @@
   (:import java.util.Random)
   (:use clojure.contrib.combinatorics)
   (:use clojure.contrib.seq-utils)
+  (:use clojure.set)
   (:use infer.measures)
   (:use infer.information-theory)
   (:use infer.probability)
@@ -214,6 +215,21 @@
 	from-matrix)
        (feature-target-pairs A)))
 
+(defn matrix-map [f c]
+  (apply map
+	 (fn [& args]
+	   (map f args)) c))
+
+(defn feature-mi-matrix [A]
+  (matrix-map
+   (comp
+	#(mutual-information (first %) (rest %))
+	joint-and-marginals-from-vectors
+	from-matrix)
+       (map
+	#(feature-target-pairs A %)
+	(range 0 (column-count A)))))
+
 (defn index-of-max [v]
   (loop [max-v (first v)
 	 max-i 0
@@ -227,3 +243,37 @@
     (if (empty? xs)
       new-i
       (recur new-max new-i next-i xs)))))
+
+;;watch out for the ordering of columns that are selected from the matrix for the mi matrix.
+(defn mrmr-feature-set
+"k: # of features to select
+t: index of target
+vecs: feature-target vectors" 
+[k t vecs]
+(let [A (matrix vecs)
+      AI (feature-mi-matrix A)
+      Ixy (nth AI t)
+      initial (index-of-max Ixy)
+      S* [initial]
+      s (count AI)
+      fs (range 0 s)
+      mrmr (fn [S]
+;;repeat until s = k
+	     (if (= k (count S)) S
+;;find max: ( I(xi,y) - 1/S * sum of I(xi, xj))
+	     (let [xis (difference S fs)
+		   goal (map 
+			 (fn [xi]
+			   (- (nth Ixy xi)
+			      (* (/ 1 s)
+				 (sum (map (nth
+					    (nth I xi)
+					    xi)
+					   S))))) 
+			   xis)]
+;;move best into set of selected
+		   (recur (conj S (index-of-max goal))))))]
+  (mrmr S*)))
+
+;;next up
+;;http://en.wikipedia.org/wiki/Regularization_(mathematics)

@@ -15,8 +15,7 @@
   ([a b] (safe / a b)))
 
 (defn process-prob-map
-  "Process probability maps using a provided report function. Note that you
-   can't pass keys to reporter our you get double nested final level in map."
+  "Process probability maps using a provided report function. Note that you can't pass keys to reporter our you get double nested final level in map."
  [[a-and-b b] report]
  (into {}
   (for [[bkey bval] a-and-b]
