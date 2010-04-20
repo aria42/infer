@@ -2,12 +2,13 @@
   (:import java.util.Random)
   (:use clojure.contrib.combinatorics)
   (:use clojure.contrib.seq-utils)
+  (:use clojure.contrib.math)
   (:use clojure.set)
   (:use infer.measures)
   (:use infer.information-theory)
   (:use infer.probability)
   (:use infer.matrix)
-  (:use [infer.core :only [map-map]])
+  (:use infer.core)
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
   (:use clojure.set))
 
@@ -277,3 +278,32 @@ vecs: feature-target vectors"
 
 ;;next up
 ;;http://en.wikipedia.org/wiki/Regularization_(mathematics)
+
+;; http://en.wikipedia.org/wiki/Gradient_descent
+;; A more robust implementation of the algorithm would also check whether the function value indeed decreases at every iteration and would make the step size smaller otherwise. One can also use an adaptive step size which may make the algorithm converge faster.
+(defn gradient-descent
+([f step precision x] (gradient-descent f step precision x 0)) 
+([f step precision x1 x0]
+  (if (> (abs (- x1 x0)) precision)
+    (recur f step precision (- x1 (* step (f x1))) x1)
+	   x1)))
+
+;;http://en.wikipedia.org/wiki/Simulated_annealing
+;;simulated annealing
+;; s ← s0; e ← E(s)                                // Initial state, energy.
+;; sbest ← s; ebest ← e                            // Initial "best" solution
+;; k ← 0                                           // Energy evaluation count.
+;; while k < kmax and e > emax                     // While time left & not good enough:
+;;   snew ← neighbour(s)                           // Pick some neighbour.
+;;   enew ← E(snew)                                // Compute its energy.
+;;   if enew < ebest then                          // Is this a new best?
+;;     sbest ← snew; ebest ← enew                  // Save 'new neighbour' to 'best found'.
+;;   if P(e, enew, temp(k/kmax)) > random() then   // Should we move to it?
+;;     s ← snew; e ← enew                          // Yes, change state.
+;;   k ← k + 1                                     // One more evaluation done
+;; return sbest                                    // Return the best solution found.
+
+
+;;irls
+
+;;lars

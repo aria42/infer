@@ -2,8 +2,7 @@
   (:use clojure.contrib.math)
   (:use clojure.contrib.map-utils)
   (:use clojure.set)
-  (:use [infer.core :only [sort-map same-length?]])
-  (:use [infer.core :only [tree-comp-each]])
+  (:use infer.core)
   (:use [infer.probability :only [gt lt binary]])
   (:import org.apache.commons.math.stat.StatUtils)
   (:import [org.apache.commons.math.stat.correlation
@@ -22,8 +21,6 @@
 (defn mean [xs] (.evaluate
 		  (Mean.)
 		   (double-array xs)))
-
-(defn pow [x y] (Math/pow x y))
 
 (defn correlation [xs ys] (.correlation 
 			   (PearsonsCorrelation.)

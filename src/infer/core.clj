@@ -9,6 +9,8 @@
 (defn log2 [x]
   (MathUtils/log 2 x))
 
+(defn pow [x y] (Math/pow x y))
+
 (def pi Math/PI)
 
 (def e Math/E)

@@ -45,6 +45,20 @@
 	likely-class (apply max (keys imap))]
     (imap likely-class)))
 
+(defn pmf-predict
+  [model test-vec]
+	  ((fn each-level [tr ts]
+	     (let [[k v] (first ts)
+		   it (tr k)]
+	       (if (< (levels-deep v) 2)
+		 (if it
+		   (most-likely it)
+		   nil)
+		 (if it
+		   (each-level it v)
+		   (each-level {} v)))))
+	   model test-vec))
+
 (defn confusion-matrix
   "Computes a confusion matrix from the counts on train and test data sets
    represented as maps. traverse map...as you get to the point of counts of

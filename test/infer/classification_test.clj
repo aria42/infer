@@ -101,6 +101,22 @@
         0 {0 {0 0 1 2}
            1 {0 1 1 1}}}}))))
 
+(deftest predict-based-on-pmf
+  (is (= 0
+       (pmf-predict
+    ;;trained
+    {1 {0 0.80 1 0.20}
+     0 {0 0.1 1 0.9}}
+    ;;test
+    {1 {0 1}})))
+  (is (= 1
+       (pmf-predict
+    ;;trained
+    {1 {1 {0 0.80 1 0.20}}
+     0 {0 {0 0.1 1 0.9}}}
+    ;;test
+    {0 {0 {1 1}}}))))
+
 (deftest heterogenious-depth-confusion-matrix
   (is (= {1 {0 3, 1 2}
     0 {0 25, 1 21}}

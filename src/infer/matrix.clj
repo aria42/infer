@@ -1,5 +1,4 @@
 (ns infer.matrix
-  (:use infer.features)
   (:import java.util.Random)
   (:import [org.ujmp.core Matrix
 	    MatrixFactory
