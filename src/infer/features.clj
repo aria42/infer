@@ -196,7 +196,7 @@
 	(from-matrix (delete-columns A indices))))
 
 (defn marginalize-vecs [index vecs]
- (map #(remove-at index %) vecs))
+ (pmap #(remove-at index %) vecs))
 
 (defn marginalize-map [n m]
  (map-from-vectors
@@ -205,12 +205,13 @@
 (defn feature-target-pairs
 ([A] (feature-target-pairs A (- (column-count A) 1)))
 ([A target]
-    (for [feature (remove (eq target)
-			  (range 0 (column-count A)))]
-      (select-columns A [feature target]))))
+    (pmap (fn [feature]
+	    (select-columns A [feature target]))
+	  (remove (eq target)
+			  (range 0 (column-count A))))))
 
 (defn feature-target-mi [A]
-  (map (comp
+  (pmap (comp
 	#(mutual-information (first %) (rest %))
 	joint-and-marginals-from-vectors
 	from-matrix)
@@ -276,17 +277,27 @@ vecs: feature-target vectors"
 		   (recur (conj S (index-of-max goal))))))]
   (mrmr S*)))
 
-;;next up
-;;http://en.wikipedia.org/wiki/Regularization_(mathematics)
+(defn dydx [f x1 x0]
+  (/ (- (f x1) (f x0))
+     (- x1 x0)))
 
 ;; http://en.wikipedia.org/wiki/Gradient_descent
 ;; A more robust implementation of the algorithm would also check whether the function value indeed decreases at every iteration and would make the step size smaller otherwise. One can also use an adaptive step size which may make the algorithm converge faster.
 (defn gradient-descent
-([f step precision x] (gradient-descent f step precision x 0)) 
+([f step precision x]
+   (gradient-descent f step precision x 0)) 
 ([f step precision x1 x0]
   (if (> (abs (- x1 x0)) precision)
-    (recur f step precision (- x1 (* step (f x1))) x1)
+    (recur f step precision (- x1 (* step (dydx f x1 x0))) x1)
 	   x1)))
+
+;; (defn newton-step [X Bnext weights]
+;;   (let [mu (invlink eta)
+;;         z (plus (mult X Bnext) (mult (minus y mu) (dlink mu)))
+;;         W (diag weights)]
+;;         (mult 
+;;          (solve (mult (trans X) W X)) 
+;;          (trans X) W z)))
 
 ;;http://en.wikipedia.org/wiki/Simulated_annealing
 ;;simulated annealing
@@ -303,7 +314,13 @@ vecs: feature-target vectors"
 ;;   k ← k + 1                                     // One more evaluation done
 ;; return sbest                                    // Return the best solution found.
 
-
 ;;irls
 
 ;;lars
+
+
+
+
+
+;;next up
+;;http://en.wikipedia.org/wiki/Regularization_(mathematics)

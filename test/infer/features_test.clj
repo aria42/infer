@@ -180,6 +180,9 @@
 (defn f-prime [x]
   (- (* 4 (pow x 3)) (* 9 (pow x 2))))
 
+(defn f [x]
+  (+ (- (pow x 4) (* 3 (pow x 3))) 2))
+
 (defn within [x delta]
   #(not (or (< x (- % delta))
 	    (> x (+ % delta)))))
@@ -189,5 +192,4 @@
 	step 0.01
 	precision 0.00001]
     (is ((within 2.24996 0.00001)
-	   (gradient-descent f-prime step precision x)))))
-
+	   (gradient-descent f step precision x)))))
