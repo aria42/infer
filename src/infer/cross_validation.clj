@@ -107,16 +107,15 @@
 Lastly, takes n seqs of input-output vectors (or feature-target if that's how you roll) to be used as training and test examples.
 
 holds each seq of vectors out in turn as the test set, merges the rest as training, and performs n-way cross-validation.
-
-TODO: for now you are left on your own to aggregate the losses after the fn returns, should we parameterize teh aggregator as well?
 "
   [model train fitness examples]
+  (apply deep-merge-with +
     (pmap
      (fn [test-set]
       (let [training-set (remove #{test-set} examples)
 	    trained (train model training-set)]
 	(fitness trained test-set)))
-	 examples))
+	 examples)))
 
 (defn to-pmf [model training-set]
    (model
@@ -132,16 +131,26 @@ TODO: for now you are left on your own to aggregate the losses after the fn retu
    (model
      (apply concat training-set)))
 
+(defn discretized-linear-model [ys xs]
+  (bucket #(predict
+	    (ols-linear-model ys xs)
+	    %)
+	  [0 1 2]))
+
+(defn discretized-knn [vecs]
+  (bucket (knn-smoother 10 vecs)
+	  [0 1 2]))
+
+;;TODO: eliminate all this duplciaiton and decouple CV from confusion matrices (makes it coupled to classification problems only)
 (defn cross-validation-confusion-matrix
   "Takes a set of n joint PMFs, and holds each joint PMF out in turn as the test
    set. Merges the resulting n cross-validation matrices into a single matrix."
   [xs]
-  (apply deep-merge-with +
     (cross-validate
      model-from-maps
      to-pmf
      #(confusion-matrix %1 (first %2))
-     xs)))
+     xs))
 
 (defn cross-validation-linear-model
   [xs]
@@ -149,16 +158,11 @@ TODO: for now you are left on your own to aggregate the losses after the fn retu
 			   #(feature-vectors % missing-smoother)
 			   first)
 			  xs)]
-    (apply deep-merge-with +
-	   (cross-validate
-	    (fn [x y]
-	      (bucket #(predict
-			(ols-linear-model x y)
-			%)
-		      [0 1 2 3]))
-	      to-linear-model
-	      linear-model-confusion-matrix
-	      feature-vecs))))
+    (cross-validate
+     discretized-linear-model
+     to-linear-model
+     linear-model-confusion-matrix
+     feature-vecs)))
 
 (defn cross-validation-kernel-smoother
   [xs]
@@ -166,11 +170,8 @@ TODO: for now you are left on your own to aggregate the losses after the fn retu
 			   #(feature-vectors % missing-smoother)
 			   first)
 			  xs)]
-    (apply deep-merge-with +
-	   (cross-validate
-	    (fn [vecs]
-	      (bucket (knn-smoother 10 vecs)
-		      [0 1 2 3]))
-	      to-nn-model
-	      nn-confusion-matrix
-	      feature-vecs))))
+    (cross-validate
+     discretized-knn
+     to-nn-model
+     nn-confusion-matrix
+     feature-vecs)))
