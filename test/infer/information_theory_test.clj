@@ -38,21 +38,29 @@
 
 ;;Mutual information quantifies the dependence between the joint distribution of X and Y and what the joint distribution would be if X and Y were independent.
 (deftest mutual-information-tests
- (let [py {1 3
-     2 5}
-       pz {1 4
-     2 2
-     3 1
-     4 1}
-       independent-joint
-       {1 {1 12
-     2 6
-     3 3
-     4 3}
-  2 {1 20
-     2 10
-     3 5
-     4 5}}]
-
- (is (= 0
-  (mutual-information independent-joint [py pz])))))
+  (let [py {1 3
+	    2 5}
+	pz {1 4
+	    2 2
+	    3 1
+	    4 1}
+	independent-joint
+	{1 {1 12
+	    2 6
+	    3 3
+	    4 3}
+	 2 {1 20
+	    2 10
+	    3 5
+	    4 5}}]
+    (is (= 0
+	   (mutual-information independent-joint [py pz]))))
+  (let [py {1 3
+	    2 5}
+	pz {1 3
+	    2 5}
+	dependent-joint
+	{1 {1 6}
+	 2 {2 5}}]
+    (is (= 1.1660760651114532
+	   (mutual-information dependent-joint [py pz])))))

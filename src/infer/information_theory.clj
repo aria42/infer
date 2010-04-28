@@ -38,16 +38,16 @@
    applying the algorithm."
   [p-counts q-counts]
   (let [p-counts (flatten-with str p-counts)
-	      q-counts (flatten-with str q-counts)
+	q-counts (flatten-with str q-counts)
         p-total (apply + (vals p-counts))
-	      q-total (apply + (vals q-counts))]
+	q-total (apply + (vals q-counts))]
     (apply +
-	    (for [[k v] p-counts
-		    :let [p (/ v p-total)
-		          q (/ (q-counts k) q-total)]
-		    :when (and (> p 0) (> q 0))]
-	      (- (* p
-		    (log2 (/ p q))))))))
+	   (for [[k v] p-counts
+		 :let [p (/ v p-total)
+		       q (/ (q-counts k) q-total)]
+		 :when (and (> p 0) (> q 0))]
+	     (* p
+		   (log2 (/ p q)))))))
 
 ;;TODO: remove deplication between entropy, gain, and kl divergences
 (defn entropy
@@ -59,7 +59,7 @@
 		    :let [p (/ v total)]
 	            ;;defines (* 0 (log2 0)) as 0 rather than Nan
 		    :when (> p 0)]
-	      (- (* p
+	     (- (* p
 		    (log2 p)))))))
 
 (defn gain
