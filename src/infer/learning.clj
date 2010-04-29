@@ -17,41 +17,31 @@
 	  (remove (eq target)
 			  (range 0 (column-count A))))))
 
+(def mi-from-matrix
+     (comp
+      #(mutual-information (first %) (rest %))
+      joint-and-marginals-from-vectors
+      from-matrix))
+
 (defn feature-target-mi [A]
-  (pmap (comp
-	#(mutual-information (first %) (rest %))
-	joint-and-marginals-from-vectors
-	from-matrix)
+  (pmap mi-from-matrix 
        (feature-target-pairs A)))
 
-(defn matrix-map [f c]
-  (apply map
-	 (fn [& args]
-	   (map f args)) c))
-
 (defn feature-mi-matrix [A]
-  (matrix-map
-   (comp
-	#(mutual-information (first %) (rest %))
-	joint-and-marginals-from-vectors
-	from-matrix)
-       (map
-	#(feature-target-pairs A %)
-	(range 0 (column-count A)))))
+  (pmap
+   #(pmap mi-from-matrix (feature-target-pairs A %))
+   (range 0 (column-count A))))
 
-(defn index-of-max [v]
-  (loop [max-v (first v)
-	 max-i 0
-	 i 0
-	 next v]
-    (let [x (first next)
-	  xs (rest next)
-	  next-i (inc i)
-	  new-max (max x max-v)
-	  new-i (if (> new-max max-v) i max-i)]
-    (if (empty? xs)
-      new-i
-      (recur new-max new-i next-i xs)))))
+(defn- max-by [keyfn coll]
+  (if (empty? coll) nil
+      (let [maxer (fn [max-elem next-elem]
+		    (if (> (keyfn max-elem) (keyfn next-elem))
+		      max-elem
+		      next-elem))]
+	(reduce maxer coll))))
+
+(defn index-of-max [v indices]
+ (second (max-by first (map vector v indices))))
 
 ;;watch out for the ordering of columns that are selected from the matrix for the mi matrix.
 (defn mrmr-feature-set
@@ -62,26 +52,25 @@ vecs: feature-target vectors"
 (let [A (matrix vecs)
       AI (feature-mi-matrix A)
       Ixy (nth AI t)
-      initial (index-of-max Ixy)
+      fs (remove (eq t) (range 0 (count AI)))
+      initial (index-of-max Ixy fs)
       S* [initial]
-      s (count AI)
-      fs (range 0 s)
       mrmr (fn [S]
 ;;repeat until s = k
 	     (if (= k (count S)) S
 ;;find max: ( I(xi,y) - 1/S * sum of I(xi, xj))
-	     (let [xis (difference S fs)
+	     (let [xis (difference (into #{} fs) (into #{} S))
 		   goal (map 
 			 (fn [xi]
 			   (- (nth Ixy xi)
-			      (* (/ 1 s)
-				 (sum (map (nth
-					    (nth I xi)
+			      (* (/ 1 (count S))
+				 (sum (map #(nth
+					    (nth AI %)
 					    xi)
-					   S))))) 
+					   S)))))
 			   xis)]
 ;;move best into set of selected
-		   (recur (conj S (index-of-max goal))))))]
+		   (recur (conj S (index-of-max goal xis))))))]
   (mrmr S*)))
 
 (defn dydx [f x1 x0]
