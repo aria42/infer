@@ -95,10 +95,10 @@
 	  data)))))
 
 (deftest counts-when-test
-  (let [data {[0 6 0 2 4] 4
-	      [0 6 0 2 3] 3
-	      [0 6 0 2 2] 2 
-	      [0 6 0 2 1] 1}]
+  (let [data  [[0 6 0 2 4 4]
+	      [0 6 0 2 3 3]
+	      [0 6 0 2 2 2] 
+	      [0 6 0 2 1 1]]]
     
   (is (= 7
 	 (counts-when

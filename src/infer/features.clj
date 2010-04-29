@@ -12,17 +12,6 @@
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
   (:use clojure.set))
 
-(defn nth-is? [i pred coll]
-  (pred (nth coll i)))
-
-;;confusing names - this one takes a vec of feature-vectors and sums the # of examples passing the pred
-(defn count-when [pred coll]
-  (count (filter pred coll)))
-
-;;confusing names - this one takes a map of feature-vectors -> counts, and sums all the counts whose feature-vector-key passes the pred
-(defn counts-when [pred coll]
-  (sum (vals (filter (comp pred first) coll))))
-
 ;;TODO: check on all these vec operations.
 ;;what about pop on ecs and butlast?
 (defn vec-but-last [s]
@@ -40,6 +29,17 @@
 (defn remove-at [i v]
   (vec (concat (subvec v 0 i)
 	  (subvec v (+ i 1) (count v)))))
+
+(defn nth-is? [i pred coll]
+  (pred (nth coll i)))
+
+;;confusing names - this one takes a vec of feature-vectors and sums the # of examples passing the pred
+(defn count-when [pred coll]
+  (count (filter pred coll)))
+
+;;confusing names - this one takes a map of feature-vectors -> counts, and sums all the counts whose feature-vector-key passes the pred
+(defn counts-when [pred coll]
+  (sum (map vec-last (filter pred coll))))
 
 (defn heterogenious-group-by
   "Returns a sorted map of the elements of coll keyed by the result of
