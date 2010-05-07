@@ -74,49 +74,93 @@ vecs: feature-target vectors"
   (mrmr S*)))
 
 (defn dydx [f x1 x0]
-  (/ (- (f x1) (f x0))
-     (- x1 x0)))
+  (let [fx1 (apply f x1)
+	fx0 (apply f x0)
+	dy (- fx1 fx0)]
+    (map #(/ dy
+	     (- %1 %2))
+	 x1 x0)))
+
+(defn update-xs [f step x1 x0]
+(map #(- %1 (* step %2)) x1 (dydx f x1 x0)))
 
 ;; http://en.wikipedia.org/wiki/Gradient_descent
 ;; A more robust implementation of the algorithm would also check whether the function value indeed decreases at every iteration and would make the step size smaller otherwise. One can also use an adaptive step size which may make the algorithm converge faster.
 (defn gradient-descent
 ([f step precision x]
-   (gradient-descent f step precision x 0)) 
+   (let [xs (if (vector? x) x [x])]
+   (gradient-descent f step precision xs (repeat (count xs) 0))))
 ([f step precision x1 x0]
-  (if (> (abs (- x1 x0)) precision)
-    (recur f step precision (- x1 (* step (dydx f x1 x0))) x1)
-	   x1)))
+   (if (<= (euclidean-distance x1 x0) precision) x1
+    (recur f step precision
+	   (update-xs f step x1 x0) x1))))
 
-;; (defn newton-step [X Bnext weights]
-;;   (let [mu (invlink eta)
-;;         z (plus (mult X Bnext) (mult (minus y mu) (dlink mu)))
-;;         W (diag weights)]
-;;         (mult 
-;;          (solve (mult (trans X) W X)) 
-;;          (trans X) W z)))
+(defn update-guesses [f loss step x1 e1]
+(map #(- %1 (* step %2)) x1 (loss f x1 e1)))
 
-;;http://en.wikipedia.org/wiki/Simulated_annealing
-;;simulated annealing
-;; s ← s0; e ← E(s)                                // Initial state, energy.
-;; sbest ← s; ebest ← e                            // Initial "best" solution
-;; k ← 0                                           // Energy evaluation count.
-;; while k < kmax and e > emax                     // While time left & not good enough:
-;;   snew ← neighbour(s)                           // Pick some neighbour.
-;;   enew ← E(snew)                                // Compute its energy.
-;;   if enew < ebest then                          // Is this a new best?
-;;     sbest ← snew; ebest ← enew                  // Save 'new neighbour' to 'best found'.
-;;   if P(e, enew, temp(k/kmax)) > random() then   // Should we move to it?
-;;     s ← snew; e ← enew                          // Yes, change state.
-;;   k ← k + 1                                     // One more evaluation done
-;; return sbest                                    // Return the best solution found.
+;;http://en.wikipedia.org/wiki/Stochastic_gradient_descent
+(defn sgd
+([f loss step precision guesses examples]
+   (sgd f loss step precision guesses
+	(repeat (count guesses) 0)
+	examples))
+([f loss step precision x1 x0 examples]
+   (if (<= (euclidean-distance x1 x0) precision) x1
+    (recur f loss step precision
+	   (update-guesses f loss step x1
+			   (first examples))
+	   x1 (rest examples)))))
+
+;; (defn dloss-dx [f loss x1 x0 e1]
+;;   (let [fx1 (loss (f x1 (vec-but-last e1)) (vec-last e1))
+;; 	fx0 (loss (f x0 (vec-but-last e1)) (vec-last e1))
+;; 	dy (- fx1 fx0)]
+;;     (map #(/ dy
+;;     	     (- %1 %2))
+;;     	 x1 x0)))
+
+;; (defn update-guesses2 [f loss step x1 x0 e1]
+;; (map #(- %1 (* step %2)) x1 (dloss-dx f loss x1 x0 e1)))
+
+;; (defn sgd2
+;; ([f loss step precision guesses examples]
+;;    (sgd2 f loss step precision guesses
+;; 	(repeat (count guesses) 0)
+;; 	examples))
+;; ([f loss step precision x1 x0 examples]
+;;    (if (<= (euclidean-distance x1 x0) precision) x1
+;;     (recur f loss step precision
+;; 	   (update-guesses2 f loss step x1 x0
+;; 			   (first examples))
+;; 	   x1 (rest examples)))))
+
+;; ;; (defn newton-step [X Bnext weights]
+;; ;;   (let [mu (invlink eta)
+;; ;;         z (plus (mult X Bnext) (mult (minus y mu) (dlink mu)))
+;; ;;         W (diag weights)]
+;; ;;         (mult 
+;; ;;          (solve (mult (trans X) W X)) 
+;; ;;          (trans X) W z)))
+
+;; ;;http://en.wikipedia.org/wiki/Simulated_annealing
+;; (defn sa
+;; [loss s kmax acceptance examples]
+;; (let [e (loss s)
+;;       sbest s
+;;       ebest e
+;;       k 0]
+;;  (if (not (and (< k kmax) (> e emax))) sbest
+;;      (let [snew (first examples) ;;todo: not the right way to select neighbor
+;; 	   enew (loss snew)
+;; 	   [sbestnew ebestnew]
+;; 	   (if (< enew ebest) [snew enew] [sbest ebest])
+;; 	   [snext enext] (if (> (acceptance e enew (temp (/ k kmax)))
+;; 				(rand)) [sbestnew ebestnew]
+;; 				[sbest ebest])]
+;;        (recur snext enext (+ k 1))))))
 
 ;;irls
 
-;;lars
-
-
-
-
-
 ;;next up
+;;lars
 ;;http://en.wikipedia.org/wiki/Regularization_(mathematics)
