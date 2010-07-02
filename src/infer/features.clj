@@ -1,7 +1,6 @@
 (ns infer.features
   (:import java.util.Random)
   (:use clojure.contrib.combinatorics)
-  (:use clojure.contrib.seq-utils)
   (:use clojure.contrib.math)
   (:use clojure.set)
   (:use infer.measures)

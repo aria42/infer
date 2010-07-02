@@ -3,7 +3,6 @@
   (:import [java.util Date Calendar])
   (:use [clojure.set :only [difference]])
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
-  (:use [clojure.contrib.seq-utils :only [flatten]])
   (:use [infer.core :only [tree-comp any?]])
   (:use [infer.core
          :only [set-to-unit-map bottom-level? map-map same-length?]]))

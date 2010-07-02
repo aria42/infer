@@ -1,8 +1,7 @@
 (ns infer.core
   (:import org.apache.commons.math.util.MathUtils)
   (:use clojure.contrib.monads)
-  (:use [clojure.set :only (intersection)])
-  (:use [clojure.contrib.seq-utils :only (flatten)]))
+  (:use [clojure.set :only [intersection]]))
 
 ;;TODO: find tests for this stuff.
 

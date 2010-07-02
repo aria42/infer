@@ -7,7 +7,6 @@
   (:use infer.features)
   (:use infer.smoothing)
   (:use infer.linear-models)
-  (:use [clojure.contrib.seq-utils :only [flatten]])
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
   (:use [infer.core :only [safe threshold-to map-map levels-deep all-keys]])
   (:use [infer.probability :only [bucket +cond-prob-tuples]]))
