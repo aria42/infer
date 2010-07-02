@@ -9,7 +9,7 @@
 ; - proper unit testing.                                                   
 ; - create a thread-safe version.                                          
 
-(ns projectioneer.lsh
+(ns infer.lsh
 	(:use [clojure.contrib.math :only (floor)])
 	(:use [clojure.contrib.seq-utils :only (shuffle)])
 	(:use [clojure.set :only (union intersection difference)])
