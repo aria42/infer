@@ -164,3 +164,6 @@ vecs: feature-target vectors"
 ;;next up
 ;;lars
 ;;http://en.wikipedia.org/wiki/Regularization_(mathematics)
+
+;;http://en.wikipedia.org/wiki/Stochastic_optimization
+;;http://en.wikipedia.org/wiki/Cross-entropy_method

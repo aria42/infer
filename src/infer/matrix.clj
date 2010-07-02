@@ -101,6 +101,9 @@
 (defn svd [#^DenseDoubleMatrix2D A]
   (.svd A))
 
+(defn qr [#^DenseDoubleMatrix2D A]
+  (.qr A))
+
 (defn solve [#^DenseDoubleMatrix2D A #^DenseDoubleMatrix2D B]
   (.solve A B))
 

@@ -32,10 +32,10 @@
 
 (defn ols-linear-model [ys xs]
  (let [X (matrix xs)
-       Xt (trans X)
-       XtX (times Xt X)
-       XtY (times Xt (matrix ys))]
-       (times (inv XtX) XtY)))
+       [Q R] (qr X)
+       Qt (trans Q)
+       QtY (times Qt (matrix ys))]
+       (times (inv R) QtY)))
 
 ;;TODO: should we pull this out of matrix form with from-matrix and flatten?
 ;;>[[60.34103261134334] [60.34103261134334]] (from-matrix (predict r1 [1.6]))))

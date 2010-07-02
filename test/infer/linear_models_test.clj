@@ -42,8 +42,8 @@
 	   weight height)
 	r2 (commons-ols-linear-model
 	    weight height)]
-    (is (= [[37.713145382089586]] (from-matrix r1)))
-    (is (= [[60.34103261134334]] (from-matrix (predict r1 [1.6]))))
+    (is (= [[37.71314538208958]] (from-matrix r1)))
+    (is (= [[60.34103261134333]] (from-matrix (predict r1 [1.6]))))
     (is (= [37.713145382089586] (commons-betas r2)))))
 
 (deftest regression-with-two-ys
@@ -53,9 +53,9 @@
 	r2 (ols-linear-model 
 	   (partition 2 (interleave weight (map #(* 2 %) weight)))
 	   height)]
-    (is (= [[37.713145382089586 37.713145382089586]] (from-matrix r1)))
-    (is (= [[60.34103261134334] [60.34103261134334]] (from-matrix (predict r1 [1.6]))))
-    (is (= [[37.713145382089586 (* 2 37.713145382089586)]] (from-matrix r2)))))
+    (is (= [[37.71314538208958 37.71314538208958]] (from-matrix r1)))
+    (is (= [[60.34103261134333] [60.34103261134333]] (from-matrix (predict r1 [1.6]))))
+    (is (= [[37.71314538208958 (* 2 37.71314538208958)]] (from-matrix r2)))))
 
 (deftest gls-regression-tests
   (let [n (count weight)
