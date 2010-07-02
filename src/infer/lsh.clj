@@ -14,7 +14,7 @@
 	(:use [clojure.contrib.seq-utils :only (shuffle)])
 	(:use [clojure.set :only (union intersection difference)])
 	(:import [java.util Random])
-	(:use [projectioneer.random-variate :only (normal-lazy-seq)]))
+	(:use [infer.random-variate :only (normal-lazy-seq)]))
 
 ;; A few helper functions that help me bridge my Clojure ignorance. - - - - ;
 ;; (defn- interleave-and-pair
