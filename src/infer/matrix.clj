@@ -104,6 +104,9 @@
 (defn qr [#^DenseDoubleMatrix2D A]
   (.qr A))
 
+(defn chol [#^DenseDoubleMatrix2D A]
+  (.chol A))
+
 (defn solve [#^DenseDoubleMatrix2D A #^DenseDoubleMatrix2D B]
   (.solve A B))
 

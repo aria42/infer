@@ -42,6 +42,7 @@
 ;;TODO: hardcoded for single label, single prediction
 		    (first (first (from-matrix (predict B xs))))))
 
+;;TODO: numericaly better here to use chelesky, svd, or qr?
 (defn ols-linear-model [ys xs]
  (let [X (matrix xs)
        [Q R] (qr X)
@@ -53,12 +54,14 @@
  (let [X (matrix xs)
        Y (matrix ys)
        S (matrix sigma)
-       Si (inv S)
-       Xt (trans X)
-       XtSi (times Xt Si)
-       XtSiX (times XtSi X)
-       XtSiY (times XtSi Y)]
-       (times (inv XtSiX) XtSiY)))
+       ;;mult the inverse cholesky factor by and and y
+       Li (inv (chol S))
+       XLi (times Li X)
+       YLi (times Li Y)
+       ;;rest is vanilla ols
+       [Q R] (qr XLi)
+       QtY (times (trans Q) YLi)]
+       (times (inv R) QtY)))
 
 (defn weighted-linear-model [ys xs weights]
   (gls-linear-model ys xs (to-diag weights)))
@@ -66,12 +69,14 @@
 ;;http://en.wikipedia.org/wiki/Tikhonov_regularization
 ;;TODO: use approaches in article above or cross validation for selecting lambda.
 ;;TODO: maybe rename all "linear-model"s above to be "regression" for api consistency? 
+;;TODO: numericaly better to use svd here or cholesky? 
 (defn ridge-regression [ys xs lambda]
  (let [X (matrix xs)
        Y (matrix ys)
        p (column-count X)
-       Xt (trans X)
-       XtX (times Xt X)
+       [U D Vt] (svd X)
        penalty (times (I p p) lambda)
-       XtY (times Xt Y)]
-       (times (inv (plus XtX penalty)) XtY)))
+       D* (times (inv (plus (times D D) penalty)) D)
+       VtD* (times (trans Vt) D*)
+       UtY (times (trans U) Y)]
+       (times VtD* UtY)))
