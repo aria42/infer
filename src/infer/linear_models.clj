@@ -30,13 +30,6 @@
 "get the betas from an OLSMultipleLinearRegression model."
   (into [] (.estimateRegressionParameters m)))
 
-(defn ols-linear-model [ys xs]
- (let [X (matrix xs)
-       [Q R] (qr X)
-       Qt (trans Q)
-       QtY (times Qt (matrix ys))]
-       (times (inv R) QtY)))
-
 ;;TODO: should we pull this out of matrix form with from-matrix and flatten?
 ;;>[[60.34103261134334] [60.34103261134334]] (from-matrix (predict r1 [1.6]))))
 ;;>[[60.34103261134334]] (from-matrix (predict r1 [1.6]))))
@@ -48,6 +41,13 @@
   (range-classifier classes
 ;;TODO: hardcoded for single label, single prediction
 		    (first (first (from-matrix (predict B xs))))))
+
+(defn ols-linear-model [ys xs]
+ (let [X (matrix xs)
+       [Q R] (qr X)
+       Qt (trans Q)
+       QtY (times Qt (matrix ys))]
+       (times (inv R) QtY)))
 
 (defn gls-linear-model [ys xs sigma]
  (let [X (matrix xs)

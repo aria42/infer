@@ -1,5 +1,5 @@
-(ns projectioneer.lsh-test
-  (:use projectioneer.lsh)
+(ns infer.lsh-test
+  (:use infer.lsh)
   (:use clojure.test))
 
 ; === A few math tests. === ;
