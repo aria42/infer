@@ -1,14 +1,3 @@
-; ======================================================================== 
-; lsh.clj - Locality Sensitive Hashing for the Near(est) Neighbors Problem 
-; ======================================================================== 
-; Currently only supports minhashing, though it is damn easy to switch out 
-; the hashing functions, given the lib's modularity.                       
-; Version 0.1 - not thread-safe, probably pretty n00b implementation.      
-; TODO:                                                                    
-; - investigate an approximate minhashing solution.                        
-; - proper unit testing.                                                   
-; - create a thread-safe version.                                          
-
 (ns infer.lsh
 	(:use [clojure.contrib.math :only (floor)])
 	(:use [clojure.contrib.seq-utils :only (shuffle)])
@@ -16,17 +5,10 @@
 	(:import [java.util Random])
 	(:use [infer.random-variate :only (normal-lazy-seq)]))
 
-;; A few helper functions that help me bridge my Clojure ignorance. - - - - ;
-;; (defn- interleave-and-pair
-;; 	"interleaves each collection of colls, then partitions them into groups of 2 each."
-;; 	[col1 col2]
-;; 	(apply vector (partition 2 (apply vector (interleave col1 col2)))))
-
 (defn interleave-and-partition
   "Takes a collection of collections, interleaves, then chunks the resulting seq into
   n-sized colls."
   [& coll-of-colls]
-  ;(println "Col: " coll-of-colls (count coll-of-colls) "total.")
   (if
    (every? map? coll-of-colls) coll-of-colls
    (partition (count coll-of-colls) (apply interleave coll-of-colls))))
@@ -95,15 +77,6 @@
 (defn spherical-l2-hash
 	"Proposed by Terasawa and Tanaka (2007)")
 
-;; (defn create-hash-ensemble
-;;   "Creates a list of hash functions with size number-of-functions, by passing in
-;;   the relevant parameters.  Each parameter in params should be a list or vector of
-;;   whatever relevant values."
-;;   [hash-fcn & param-sets]
-;;   (println "psets" param-sets (apply interleave-and-partition param-sets))
-;;   (let [pars (apply interleave-and-partition param-sets)]
-;;     (for [p pars] (apply hash-fcn p))))
-
 (defn- apply-hash-ensemble
 	"Takes a list of minhash functions and data."
 	[hash-ensemble data]
@@ -131,7 +104,7 @@
   is obvious.  Perhaps just leave the add-signature-to-buckets
   function in the lib."
   [tables id-signatures]
-    (reduce add-signature-to-lsh-tables tables id-signatures))
+    (reduce assoc-sig-table tables id-signatures))
 
 ; Left to implement:
 ; 1.) data structure inversion (get a map of ids to a set of ids.)
