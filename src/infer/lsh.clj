@@ -61,30 +61,29 @@
 
 (defn assoc-lsh
   ^{
-    :arglists '([table id sig] [table id & id-sigs])
+    :arglists '([table sig id] [table sig id & sig-ids])
     :doc "Mimics the core language's assoc function. 
     maps id to multiple maps, where sig acts like a key."
   }
   ([table sig id]
     (map 
-      #(merge-with union %1 {%2 id})
+      #(merge-with union %1 {%2 #{id}})
       table 
       (partition (/ (count sig) (count table)) sig)))
   ([table sig id & sig-ids]
     (let [ret 
             (map 
-              #(merge-with union %1 {%2 id})
+              #(merge-with union %1 {%2 #{id}})
               table
               (partition (/ (count sig) (count table)) sig))]
       (if sig-ids
         (recur ret (first sig-ids) (second sig-ids) (nnext sig-ids))
         ret))))
 
-(defn reduce-signatures-to-table
-  "This may as well be delegated to the application, since it
-  is obvious.  Perhaps just leave the add-signature-to-buckets
-  function in the lib.
-  Map and merge-with 
-"
-  [tables id-signatures]
-  (reduce assoc-lsh tables id-signatures))
+(defn merge-tables
+  "Merges together many tables of hashed indices into one table."
+  [& tables]
+  (let [lsh-merge
+	(fn [m1 m2] (map #(merge-with union %1 %2) m1 m2))]
+  (reduce lsh-merge tables)))
+
