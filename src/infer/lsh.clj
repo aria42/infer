@@ -1,78 +1,44 @@
 (ns infer.lsh
 	(:use [clojure.contrib.math :only (floor)])
-	(:use [clojure.contrib.seq-utils :only (shuffle)])
 	(:use [clojure.set :only (union intersection difference)])
 	(:import [java.util Random])
-	(:use [infer.random-variate :only (normal-lazy-seq)]))
-
-(defn interleave-and-partition
-  "Takes a collection of collections, interleaves, then chunks the resulting seq into
-  n-sized colls."
-  [& coll-of-colls]
-  (if
-   (every? map? coll-of-colls) coll-of-colls
-   (partition (count coll-of-colls) (apply interleave coll-of-colls))))
-
-(defn interleave-and-pair
-  "interleaves each collection of colls, then partitions them into groups of 2 each."
-  [col1 col2]
-  (interleave-and-partition col1 col2))
-
-; - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - ;
-
-(defn jaccard
-  [x1 x2]
-  (/ (count (intersection x1 x2)) (count (union x1 x2))))
+	(:use [infer.random-variate :only (random-normal)]))
 
 (defn dot-product
+  "TODO: get rid of this implementation"
   [x y]
-  (apply + (for [[xi yi] (interleave-and-pair x y)] (* xi yi))))
-  
-
-;================== Random Components of Hashing Functions =================;
+  (apply + (map * x y)))
 
 (defn permutation-dictionary
-  ""
+  "Creates a map of values randomly mapped.
+  TODO: rewrite."
   [dims]
   (zipmap (shuffle (range dims)) (range dims)))
-
-;===========================================================================;
 
 (defn exact-minhash
   "Originally proposed by Broder (1997), I think."
   [permutation-dict]
-  (let [perm permutation-dict]
     (fn [data]
-      (let [dict perm]
-	(apply min (for [x data] (dict x)))))))
-
+		(apply min (map permutation-dict data))))
 
 (defn hamming-hash
   "From the original paper on LSH by Indyk and Motwani (1998)."
   [random-index]
-  (let [rand-index random-index]
     (fn [data] 
-      (let [ri rand-index]
-	(data ri)))))
+      (data random-index)))
 
 (defn l1-hash
-	""
+	"TODO: reimplement"
 	[random-value width]
-	(let [rand-val random-value
-	      wi width]
 	  (fn [data-coord]
-	    (let [rv rand-val
-		  w wi]
-	      (floor (/ (- data-coord rv) w))  ))))
+	      (floor (/ (- data-coord random-value) width)))) 
 
 (defn lp-hash
-  "As seen in 'Locality Sensitive Hashing Based on p-Stable Distributions' by Indyk et al. (ACM 2004)."
+  "As seen in 'Locality Sensitive Hashing Based on p-Stable Distributions' by Indyk et al. (ACM 2004).
+  TODO: integrate UJMP stuff and dot product."
   [v b r]
   (fn [data]
-    (let [rand-v v
-	  rand-b b
-	   val-r r]
-      (floor (/ (+ rand-b (dot-product data rand-v)) val-r)))))
+      (floor (/ (+ b (dot-product data v)) r))))
 
 (defn spherical-l2-hash
 	"Proposed by Terasawa and Tanaka (2007)")
@@ -87,45 +53,38 @@
 	[number-of-hash-functions]
 	(dotimes [_ number-of-hash-functions] {}))
 
-(defn data-to-signature
+(defn map-hash
   "Outputs a signature (list) whose vectors represent the hashed values
   of the data."
   [hash-ensemble data]
   (map #(% data) hash-ensemble))
 
-(defn assoc-sig-table
-  [tables id-sig]
-  (let [[id signature] id-sig]
-    (for [[sig table] (interleave-and-pair signature tables)]
-      (merge-with  #(union %1 %2) tables {sig #{id}}))))
+(defn assoc-lsh
+  ^{
+    :arglists '([table id sig] [table id & id-sigs])
+    :doc "Mimics the core language's assoc function. 
+    maps id to multiple maps, where sig acts like a key."
+  }
+  ([table sig id]
+    (map 
+      #(merge-with union %1 {%2 id})
+      table 
+      (partition (/ (count sig) (count table)) sig)))
+  ([table sig id & sig-ids]
+    (let [ret 
+            (map 
+              #(merge-with union %1 {%2 id})
+              table
+              (partition (/ (count sig) (count table)) sig))]
+      (if sig-ids
+        (recur ret (first sig-ids) (second sig-ids) (nnext sig-ids))
+        ret))))
 
 (defn reduce-signatures-to-table
   "This may as well be delegated to the application, since it
   is obvious.  Perhaps just leave the add-signature-to-buckets
-  function in the lib."
+  function in the lib.
+  Map and merge-with 
+"
   [tables id-signatures]
-    (reduce assoc-sig-table tables id-signatures))
-
-; Left to implement:
-; 1.) data structure inversion (get a map of ids to a set of ids.)
-; 2.) ...
-
-; ==================== OLD FUNCTIONALITY ======================== ;
-
-;; (defn assoc-lsh
-;; 	"Returns a new list of maps, with id being mapped into the appropriate
-;; 	signature bins by its data."
-;; 	[ensemble bin-size id data bins]
-;; 	(let [signature (partition bin-size (apply-hash-ensemble ensemble data))]
-;; 		(for [[sig bin] (interleave-and-pair signature bins)] (merge-with #(union %1 %2) bin {sig #{id}}))))
-
-;; (defn get-lsh
-;; 	"Returns a set of ids that match this data point.
-;; 	Can be used with non-binned data."
-;; 	[ensemble bin-size bins id data-point]
-;; 	(let [
-;; 		    signature (partition bin-size (apply-hash-ensemble ensemble data-point))
-;; 		    sets (for [[sig bin] (interleave-and-pair signature bins)] (get bin sig nil))]
-;; 		(difference (reduce union #{} sets) #{id})))
-
-
+  (reduce assoc-lsh tables id-signatures))
