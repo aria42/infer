@@ -5,14 +5,19 @@
 
 ;;TODO: find tests for this stuff.
 
-(defn log2 [x]
-  (MathUtils/log 2 x))
-
 (defn pow [x y] (Math/pow x y))
 
 (def pi Math/PI)
 
 (def e Math/E)
+
+(defn exp [x] (Math/pow e x))
+
+(defn log2 [x]
+  (MathUtils/log 2 x))
+
+(defn ln [x]
+  (MathUtils/log e x))
 
 (defn cos [x] (Math/cos x)) 
 (defn acos [x] (Math/acos x)) 

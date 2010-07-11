@@ -14,7 +14,7 @@
 	(is (= (jaccard #{1 2 3} #{2 3 4}) 0.5) "#{1 2 3} and #{2 3 4} should have a jaccard sim of .5."))
 
 (deftest test-dot-product
-  (is (= 100 (dot-product [5 5 5 5] [5 5 5 5]))))
+  (is (= 100 (dot-product2 [5 5 5 5] [5 5 5 5]))))
 
 ; === Testing helper functions. === ;
 

@@ -25,18 +25,23 @@
   (if (not (coll? (first xs))) ;;1 column
     (map #(vector 1 %) xs)
     (map #(vec (cons 1 %)) xs)))
-  
+
 (defn matrix [xs]
   (cond (not (coll? xs)) ;;already a matrix
 	xs
-	(not (coll? (first xs))) ;;1 column
-	(matrix (map vector xs))
 	:else
 	(MatrixFactory/importFromArray #^"[[D" (doubles-2d xs))))
 
+(defn column-matrix [ys]
+  (matrix (map vector ys)))
+
 (defn from-matrix [X]
- (map #(into [] %)
-      (.toDoubleArray X)))
+  (map #(into [] %)
+       (.toDoubleArray X)))
+
+(defn from-column-matrix [X]
+  (flatten (map #(into [] %)
+		(.toDoubleArray X))))
 
 (defn fill [v r c]
   (MatrixFactory/fill v (long-array [r c])))
@@ -70,6 +75,16 @@
 	   (assoc zeros i x))
 	 xs is)))
 
+(defn column-count [#^DenseDoubleMatrix2D A]
+  (.getColumnCount A))
+
+(defn row-count [#^DenseDoubleMatrix2D A]
+  (.getRowCount A))
+
+(defn count-elements [M]
+  (* (row-count M)
+     (column-count M)))
+
 (defn get-at [#^DoubleMatrix2D m r c]
   (.getDouble m (int r) (int c)))
 
@@ -90,10 +105,28 @@
   (.mtimes A #^DenseDoubleMatrix2D B)
   (.mtimes A #^Double (double B))))
 
+(defn divide [#^DenseDoubleMatrix2D A B]
+  (if (isa? (class B) DenseDoubleMatrix2D)
+  (.divide A #^DenseDoubleMatrix2D B)
+  (.divide A #^Double (double B))))
+
 (defn plus [#^DenseDoubleMatrix2D A B]
   (if (isa? (class B) DenseDoubleMatrix2D)
   (.plus A #^DenseDoubleMatrix2D B)
   (.plus A #^Double (double B))))
+
+(defn minus [#^DenseDoubleMatrix2D A B]
+  (if (isa? (class B) DenseDoubleMatrix2D)
+  (.minus A #^DenseDoubleMatrix2D B)
+  (.minus A #^Double (double B))))
+
+(defn elementwise-plus [e M]
+(plus (fill e (row-count M) (column-count M))
+       M))
+
+(defn elementwise-minus [e M]
+(minus (fill e (row-count M) (column-count M))
+       M))
 
 (defn trans [#^DenseDoubleMatrix2D A]
   (.transpose A))
@@ -112,12 +145,6 @@
 
 (defn inv [#^DenseDoubleMatrix2D A]
   (.inv A))
-
-(defn column-count [#^DenseDoubleMatrix2D A]
-  (.getColumnCount A))
-
-(defn row-count [#^DenseDoubleMatrix2D A]
-  (.getRowCount A))
 
 (def link-to-matrix Calculation$Ret/LINK)
 (def new-matrix Calculation$Ret/NEW)
@@ -138,3 +165,9 @@
 (defn select-rows
   [#^DenseDoubleMatrix2D A rows]
   (.selectRows A new-matrix rows))
+
+(defn column-concat 
+[& Ms] (MatrixFactory/horCat (into-array #^Matrix Ms)))
+
+(defn row-concat 
+[& Ms] (MatrixFactory/vertCat (into-array #^Matrix Ms)))

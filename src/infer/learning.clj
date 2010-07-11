@@ -8,6 +8,7 @@
   (:use infer.features))
 
 ;;optimization, regularization, and subset selection
+;;TODO: should be split into a few libs
 
 (defn feature-target-pairs
 ([A] (feature-target-pairs A (- (column-count A) 1)))
@@ -84,9 +85,11 @@ vecs: feature-target vectors"
 (defn update-xs [f step x1 x0]
 (map #(- %1 (* step %2)) x1 (dydx f x1 x0)))
 
-;; http://en.wikipedia.org/wiki/Gradient_descent
-;; A more robust implementation of the algorithm would also check whether the function value indeed decreases at every iteration and would make the step size smaller otherwise. One can also use an adaptive step size which may make the algorithm converge faster.
 (defn gradient-descent
+"http://en.wikipedia.org/wiki/Gradient_descent
+
+A more robust implementation of the algorithm would also check whether the function value indeed decreases at every iteration and would make the step size smaller otherwise. One can also use an adaptive step size which may make the algorithm converge faster.
+"
 ([f step precision x]
    (let [xs (if (vector? x) x [x])]
    (gradient-descent f step precision xs (repeat (count xs) 0))))
@@ -98,8 +101,8 @@ vecs: feature-target vectors"
 (defn update-guesses [f loss step x1 e1]
 (map #(- %1 (* step %2)) x1 (loss f x1 e1)))
 
-;;http://en.wikipedia.org/wiki/Stochastic_gradient_descent
 (defn sgd
+"http://en.wikipedia.org/wiki/Stochastic_gradient_descent"
 ([f loss step precision guesses examples]
    (sgd f loss step precision guesses
 	(repeat (count guesses) 0)
@@ -158,12 +161,3 @@ vecs: feature-target vectors"
 ;; 				(rand)) [sbestnew ebestnew]
 ;; 				[sbest ebest])]
 ;;        (recur snext enext (+ k 1))))))
-
-;;irls
-
-;;next up
-;;lars
-;;http://en.wikipedia.org/wiki/Regularization_(mathematics)
-
-;;http://en.wikipedia.org/wiki/Stochastic_optimization
-;;http://en.wikipedia.org/wiki/Cross-entropy_method

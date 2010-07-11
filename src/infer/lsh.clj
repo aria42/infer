@@ -27,7 +27,10 @@
 (defn dot-product
   [x y]
   (apply + (for [[xi yi] (interleave-and-pair x y)] (* xi yi))))
-  
+
+(defn dot-product2
+  [x y]
+  (apply + (map * x y)))
 
 ;================== Random Components of Hashing Functions =================;
 

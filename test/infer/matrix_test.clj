@@ -21,7 +21,7 @@
 (deftest create-matrix
   (let [m (matrix
 	   [[1 2 3] [4 5 6]])
-	single-m (matrix [1 2 3 4 5 6])]
+	single-m (column-matrix [1 2 3 4 5 6])]
 	   (is (= 6 (get-at m 1 2)))
 	   (is (= 6 (get-at single-m 5 0)))))
 
@@ -30,6 +30,13 @@
 	A (matrix
 	   [[1 2 3] [4 5 6]])
 	b (from-matrix A)]
+	(is (= a b))))
+
+(deftest to-and-from-column-matrix
+  (let [a [1 2 3]
+	A (column-matrix
+	   a)
+	b (from-column-matrix A)]
 	(is (= a b))))
 
 (deftest identity-matrix
@@ -43,3 +50,12 @@
 	  [0 2 0]
 	  [0 0 3]]
 	  (to-diag [1 2 3]))))
+
+(deftest concat-columns
+  (is (= (from-matrix
+	  (matrix [[1 2 3]
+		   [2 3 4]]))
+	 (from-matrix (column-concat
+		       (column-matrix [1 2])
+		       (column-matrix [2 3])
+		       (column-matrix [3 4]))))))
