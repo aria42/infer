@@ -1,5 +1,5 @@
 (ns infer.random-variate
-	(:use [clojure.contrib.math :only (expt sqrt)])
+  (:use [clojure.contrib.math :only (expt sqrt)])
 	(:use [clojure.contrib.generic.math-functions :only (tan log cos sin)]))
 
 (defn exp-rv
@@ -39,8 +39,8 @@
 		    R2 (* (sqrt (* (- 0 2) (log U1))) (sin (* 2 Math/PI U2)))]
 		[R1 R2]))
 
-(defn normal-lazy-seq
+(defn random-normal
 	"Generate a lazy sequence of unit normal random variables."
 	[]
 	(let [bm (box-muller)]
-	(lazy-seq (concat bm (normal-lazy-seq)))))
+	(lazy-seq (concat bm (random-normal)))))

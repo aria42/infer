@@ -2,61 +2,59 @@
   (:use infer.lsh)
   (:use clojure.test))
 
-; === A few math tests. === ;
-
-(deftest jaccard-identical
-	(is (= (jaccard #{1 2 3} #{1 2 3}) 1) "#{1 2 3} did not show up as equal to #{1 2 3}."))
-
-(deftest jaccard-orthogonal
-	(is (= (jaccard #{1 2 3} #{4 5 6}) 0) "#{1 2 3} did not show up as orthogonal to #{4 5 6}"))
-
-(deftest jaccard-partial-overlap
-	(is (= (jaccard #{1 2 3} #{2 3 4}) 0.5) "#{1 2 3} and #{2 3 4} should have a jaccard sim of .5."))
-
 (deftest test-dot-product
-  (is (= 100 (dot-product2 [5 5 5 5] [5 5 5 5]))))
-
-; === Testing helper functions. === ;
-
-; Might phase out this functionality soon.
-(deftest test-interleave-and-partition
-  (is (= [[1 10 100] [2 20 200] [3 30 300]] (interleave-and-partition [1 2 3] [10 20 30] [100 200 300])))
-  ;(is (= [[1 1 1 1]] (interleave-and-partition [1 1 1 1])))
-  ;(is (= [{} {}] (interleave-and-partition {0 0, 1 1} {0 0, 1 1})))
-  )
-
-; === Testing hashing functions. === ;
-
-(deftest test-exact-minhash
-  (is (=
-       0
-       ((exact-minhash {3 0, 2 1, 1 2, 0 3}) #{1 3})))
-  (is (=
-       [0 1]
+  (is (= 100 (dot-product [5 5 5 5] [5 5 5 5]))))
+  
+(deftest basic-exact-minhash
+  (let [perm-dict-1 {3 0, 2 1, 1 2, 0 3}
+	perm-dict-2 {3 2, 2 1, 1 0, 0 3}
+	p1 #{1 3}
+	p2 #{3 2}]
+  (is (= 0 ((exact-minhash perm-dict-1) p1)))
+  (is (= [0 1]
        (map
-	#(% #{3 2})
-	(map
-	 exact-minhash [{3 0, 2 1, 1 2, 0 3} {3 2, 2 1, 1 0, 0 3}])))))
+         #(% p2)
+         (map
+           exact-minhash 
+           [perm-dict-1 
+            perm-dict-2]))))))
 
-(deftest test-hamming-hash
-  (is (= 1
-	 ((hamming-hash 3) [0 0 0 1 0 0 0 0 0])))
+(deftest basic-hamming-hash
+  (let [v1 [0 0 0 1 0 0 0 0 0]
+	v2 [1 2 10 4 5 6 7 8 9 20]] 
+  (is (= 1 ((hamming-hash 3) v1)))
   (is (= [1 10]
-	   (map #(% [1 2 10 4 5 6 7 8 9 20])
-		(map hamming-hash [0 2])))))
+    (map #(% v2)
+         (map hamming-hash [0 2]))))))
 
-; (deftest test-l1-hash
-;   "Needs to be rewritten ... function is a bit sloppy, not entirely sure it's right."
-;   (is (= 1 0) "Function not implemented."))  
-
-(deftest test-lp-hash
-  (is (= 1 ((lp-hash [1 1 1 1 1] 1 5) [1 1 1 1 1])))
+(deftest basic-lp-hash
+  (let [v1 [1 1 1 1 1] v2 [1 1 0 0 0]]
+  (is (= 1 ((lp-hash v1 1 5) v1)))
   (is (= [1 0]
-	   (map #(% [1 1 1 1 1])
-		(map lp-hash
-		     [[1 1 1 1 1] [1 1 0 0 0]]
-		     [1  1]
-		     [5 5])))))
+      (map #(% v1)
+       (map lp-hash [v1 v2] [1  1] [5 5]))))))
 
-; (deftest test-spherical-l2-hash
-;   (is (= 1 0) "Function not implemented.")) 
+(deftest add-to-tables
+  (let [v1 [0 0 3 0 0 0 0 0 0]
+	v2 [1 2 3 4 5 6 7 8 9 20]
+	lsh-table [{} {}]
+	hamming-hash-fcns [(hamming-hash 1) (hamming-hash 2)]
+	hp1 (map #(% v1) hamming-hash-fcns)
+	hp2 (map #(% v2) hamming-hash-fcns)]
+    (is (= [{[2] #{1}} {[3] #{1}}]
+	   (assoc-lsh lsh-table hp2 1)))
+    (is (= [{[2] #{2}, [0] #{1}}
+	    {[3] #{1, 2}}]
+	     (assoc-lsh lsh-table hp1 1 hp2 2)
+	     ))))
+
+(deftest merging-multiple-tables
+  (let [table1
+	[{[1 1] #{1 2}, [2 2] #{3 4}}
+	 {[1 2] #{1}, [2 3] #{2 3 4}}]
+	table2
+	[{[1 1] #{5}, [2 3] #{6 7}}
+	 {[1 2] #{6}, [2 4] #{5 7}}]]
+    (is (= [{[1 1] #{1 2 5}, [2 2] #{3 4}, [2 3] #{6 7}}
+	    {[1 2] #{1 6}, [2 3] #{2 3 4}, [2 4] #{5 7}}]
+	     (merge-tables table1 table2)))))
