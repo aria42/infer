@@ -100,25 +100,56 @@
      m))
 
 ;;TODO: abstract general pattern for calling these operations on the underlying matrix object
-(defn times [#^DenseDoubleMatrix2D A B]
+(defn times
+  "Performs matrix multiplication of A, an n x k matrix, and B, a k x l matrix,
+  and outputs an n x l matrix.  If there are more matrices Ms, continues to
+  multiply them all from left to right in the usual fashion."
+  ([#^DenseDoubleMatrix2D A B]
   (if (isa? (class B) DenseDoubleMatrix2D)
   (.mtimes A #^DenseDoubleMatrix2D B)
   (.mtimes A #^Double (double B))))
+  ([#^DenseDoubleMatrix2D A B & Ms]
+     (let [AB (times A B)]
+       (if Ms
+	 (recur AB (first Ms) (next Ms))
+	 AB))))
 
-(defn divide [#^DenseDoubleMatrix2D A B]
+(defn divide
+  ([#^DenseDoubleMatrix2D A B]
   (if (isa? (class B) DenseDoubleMatrix2D)
   (.divide A #^DenseDoubleMatrix2D B)
   (.divide A #^Double (double B))))
+  ([#^DenseDoubleMatrix2D A B & Ms]
+     (let [AB (divide A B)]
+       (if Ms
+	 (recur AB (first Ms) (next Ms))
+	 AB))))
 
-(defn plus [#^DenseDoubleMatrix2D A B]
+(defn plus
+  "Adds matrices A in B in the usual way, assuming they are of the same size.
+  If additional matrices Ms are supplied, adds them all from left to right."
+  ([#^DenseDoubleMatrix2D A B]
   (if (isa? (class B) DenseDoubleMatrix2D)
   (.plus A #^DenseDoubleMatrix2D B)
   (.plus A #^Double (double B))))
+  ([#^DenseDoubleMatrix2D A B & Ms]
+     (let [AB (plus A B)]
+       (if Ms
+	 (recur AB (first Ms) (next Ms))
+	 AB))))
 
-(defn minus [#^DenseDoubleMatrix2D A B]
+(defn minus
+    "Subtracts matrices A in B in the usual way, assuming they are of the same size.
+  If additional matrices Ms are supplied, subtracts them all from left to right."
+  ([#^DenseDoubleMatrix2D A B]
   (if (isa? (class B) DenseDoubleMatrix2D)
   (.minus A #^DenseDoubleMatrix2D B)
   (.minus A #^Double (double B))))
+  ([#^DenseDoubleMatrix2D A B & Ms]
+     (let [AB (minus A B)]
+       (if Ms
+	 (recur AB (first Ms) (next Ms))
+	 AB))))
 
 (defn elementwise-plus [e M]
 (plus (fill e (row-count M) (column-count M))
