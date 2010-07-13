@@ -29,9 +29,9 @@
        (times (inv R) QtY)))
 
 (defn gls-linear-model [Y X S]
- (let [Li (inv (chol S))
+  (let [Li (inv (chol S))
        XLi (times Li X)
-       YLi (times Li Y)]
+	YLi (times Li Y)]
        (ols-linear-model YLi XLi)))
 
 (defn weighted-linear-model [Y X weights]
@@ -54,15 +54,18 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
        (times VtD* UtY)))
 
 (defn irls [Y X Bold precision]
-  (let [yhat (times X Bold)
-	P (map #(/ 1 (+ 1 (exp (- %))))
+  (let [
+	yhat (times X Bold)
+ 	P (map #(/ 1 (+ 1 (exp (- %))))
 	       (from-column-matrix yhat))
 	weights (map #(* % (- 1 %)) P)
 	W (matrix (to-diag weights))
 	z (plus yhat
 		(times (inv W)
 		       (minus Y (column-matrix P))))
-	Bnew (gls-linear-model z X W)]
+	;Bnew (gls-linear-model z X W)]
+	; Temporary fix for irls ... need to rework GLS and use those results.
+	Bnew (times (inv (times (trans X) W X )) (times (trans X) W z)) ]
     (if (<= (euclidean-distance (from-column-matrix Bnew)
 				(from-column-matrix Bold)) precision) Bnew
 	(recur Y X Bnew precision))))
