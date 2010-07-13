@@ -1,6 +1,7 @@
 (ns infer.linear-models-test 
   (:use clojure.test)
   (:use infer.matrix)
+  (:use infer.measures)
   (:use infer.linear-models))
 
 (def height
@@ -96,6 +97,7 @@
 
 (def Bguess (column-matrix [0 0 0]))
 
-;; (deftest irls-test
-;;   (is (= [-1.7078 1.1972 0.4182]
-;; 	 (irls Y X Bguess 0.001))))
+(deftest irls-test
+   (is (>= 0.0001 (euclidean-distance
+	 [-1.7078 1.1972 0.4182]
+ 	 (from-column-matrix (irls Y X Bguess 0.0001))))))
