@@ -51,6 +51,34 @@
 	  [0 0 3]]
 	  (to-diag [1 2 3]))))
 
+(deftest matrix-multiplication
+  (let [A (matrix [[1 1] [1 1]])
+	B (matrix [[2 2] [2 2]])
+	C (matrix [[2 0] [0 2]])]
+    (is (= (matrix [[4 4] [4 4]]) (times A B)))
+    (is (= (matrix [[8 8] [8 8]]) (times A B C)))))
+
+;; (deftest matrix-divide
+;;   (let [A (matrix [[1 1] [1 1]])
+;; 	B (matrix [[2 2] [2 2]])
+;; 	C (matrix [[2 0] [0 2]])]
+;;     (is (= (matrix [[0.5 0.5] [0.5 0.5]]) (divide A B)))
+;;     (is (= (matrix [[8 8] [8 8]]) (divide A B C)))))
+
+(deftest matrix-addition
+  (let [A (matrix [[1 1] [1 1]])
+	B (matrix [[2 2] [2 2]])
+	C (matrix [[2 0] [0 2]])]
+  (is (= (matrix [[3 3] [3 3]]) (plus A B)))  
+  (is (= (matrix [[5 3] [3 5]]) (plus A B C)))))
+
+(deftest matrix-subtraction
+  (let [A (matrix [[1 1] [1 1]])
+	B (matrix [[2 2] [2 2]])
+	C (matrix [[2 0] [0 2]])]
+  (is (= (matrix [[1 1] [1 1]]) (minus B A)))  
+  (is (= (matrix [[-1 1] [1 -1]]) (minus B A C)))))
+
 (deftest concat-columns
   (is (= (from-matrix
 	  (matrix [[1 2 3]
