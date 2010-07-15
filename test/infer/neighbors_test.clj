@@ -1,8 +1,8 @@
-(ns infer.smoothing-test
+(ns infer.neighbors-test
   (:use clojure.test
 	infer.matrix
 	infer.measures
-	infer.smoothing))
+	infer.neighbors))
 
 (deftest all-are-true
   (is (not (all? [false])))

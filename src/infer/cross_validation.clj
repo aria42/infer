@@ -1,6 +1,6 @@
 (ns infer.cross-validation
   (:use infer.features)
-  (:use infer.smoothing)
+  (:use infer.neighbors)
   (:use infer.linear-models)
   (:use [clojure.contrib.seq-utils :only [flatten]])
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])

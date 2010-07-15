@@ -1,4 +1,4 @@
-(ns infer.smoothing
+(ns infer.neighbors
   (:use infer.measures)
   (:use infer.core)
   (:use infer.features)
