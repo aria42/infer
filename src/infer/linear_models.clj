@@ -55,11 +55,11 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
        UtY (times (trans U) Y)]
        (times VtD* UtY)))
 
-(defn irls [Y X Bold precision]
+(defn irls [Y X linkfn varfn Bold precision]
   (let [yhat (times X Bold)
- 	P (map #(/ 1 (+ 1 (exp (- %))))
+ 	P (map linkfn
 	       (from-column-matrix yhat))
-	weights (map #(* % (- 1 %)) P)
+	weights (map varfn P)
 	W (matrix (to-diag weights))
 	z (plus yhat
 		(times (inv W)
@@ -69,7 +69,7 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
 	Bnew (times (inv (times (trans X) W X )) (times (trans X) W z)) ]
     (if (<= (euclidean-distance (from-column-matrix Bnew)
 				(from-column-matrix Bold)) precision) Bnew
-	(recur Y X Bnew precision))))
+	(recur Y X linkfn varfn Bnew precision))))
 
 (defn lasso [Y X Bold lambda precision]
   (let [inner (fn [Blast j]
