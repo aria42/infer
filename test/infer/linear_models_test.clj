@@ -101,7 +101,7 @@
 (deftest irls-test
    (is (>= 0.0001 (euclidean-distance
 	 [-1.7078 1.1972 0.4182]
- 	 (from-column-matrix (irls Y X Bguess 0.0001))))))
+ 	 (from-column-matrix (irls Y X logistic-link binomial-variance Bguess 0.0001))))))
 
 ;; (deftest lasso-test
 ;;  (let [X (io/csv->matrix "/home/bradford/infer/data/lars_x.csv")
