@@ -161,3 +161,6 @@
    (=  0.8591549295774648
        (tanimoto-coefficient  [2 4 3 1 6]
 			      [3 5 1 2 5]))))
+
+(deftest test-dot-product
+  (is (= 100 (dot-product [5 5 5 5] [5 5 5 5]))))
