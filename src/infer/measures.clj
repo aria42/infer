@@ -644,3 +644,19 @@ The Levenshtein distance has several simple upper and lower bounds that are usef
                      i (range 1 (+ 1 m))] [i j]))]
 
     ((table m) n)))
+
+(defn logistic-link
+  [yhat]
+  (/ 1 (+ 1 (exp (- yhat)))))
+
+(defn binomial-variance
+  [p]
+  (* p (- 1 p)))
+
+(defn poisson-link
+  [yhat]
+  (exp yhat))
+
+(defn poisson-variance
+  [mu]
+  mu)
