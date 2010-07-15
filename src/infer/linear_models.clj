@@ -1,6 +1,8 @@
 (ns infer.linear-models
+  (:use clojure.contrib.math)
   (:use infer.core)
   (:use infer.matrix)
+  (:use infer.learning)
   (:use infer.measures)
   (:use infer.probability))
 
@@ -54,8 +56,7 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
        (times VtD* UtY)))
 
 (defn irls [Y X Bold precision]
-  (let [
-	yhat (times X Bold)
+  (let [yhat (times X Bold)
  	P (map #(/ 1 (+ 1 (exp (- %))))
 	       (from-column-matrix yhat))
 	weights (map #(* % (- 1 %)) P)
@@ -69,3 +70,19 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
     (if (<= (euclidean-distance (from-column-matrix Bnew)
 				(from-column-matrix Bold)) precision) Bnew
 	(recur Y X Bnew precision))))
+
+(defn lasso [Y X Bold lambda precision]
+  (let [inner (fn [Blast j]
+		 (let [Xj (select-columns X [j])
+		       Rj (plus
+			   (minus Y
+				  (times X Blast))
+			   (times Xj (get-at Blast j 0)))
+		       Bj* (/ (times (trans Xj) Rj)
+			      (row-count X))
+		       Bjnew (* (sign Bj*)
+				    (max 0 (- (abs Bj*) lambda)))
+		       _ (set-at Blast Bjnew j 0)]
+		   (if (= 0 j) Blast
+		       (recur Blast (- j 1)))))]
+  (coordinate-descent inner Bold active-set-convergence? (- (column-count X) 1))))

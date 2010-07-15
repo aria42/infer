@@ -81,3 +81,7 @@
 ;; 	   (first (sgd2 (fn [[x1] [x0]] (* 3 x1 x0))
 ;; 		       (fn [x1 x0] (pow (- x1 x0) 2))
 ;; 		       step precision [x] examples))))))
+
+(deftest active-set-test
+  (is (= [0 2]
+	 (active-set [2 0 1]))))

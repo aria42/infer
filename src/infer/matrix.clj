@@ -91,6 +91,9 @@
 (defn set-at [#^DoubleMatrix2D m v r c]
  (.setDouble m (double v) (int r) (int c)))
 
+(defn copy-matrix [#^DoubleMatrix2D m]
+ (.copy m))
+
 (defn inc-at
   ([m r c] (inc-at m 1 r c))
   ([m by r c]
@@ -191,11 +194,11 @@
 
 (defn select-columns
   [#^DenseDoubleMatrix2D A columns]
-  (.selectColumns A new-matrix columns))
+  (.selectColumns A new-matrix (long-array columns)))
 
 (defn select-rows
   [#^DenseDoubleMatrix2D A rows]
-  (.selectRows A new-matrix rows))
+  (.selectRows A new-matrix (long-array rows)))
 
 (defn column-concat 
 [& Ms] (MatrixFactory/horCat (into-array #^Matrix Ms)))

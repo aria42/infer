@@ -1,5 +1,6 @@
 (ns infer.linear-models-test 
   (:use clojure.test)
+  (:require [infer.io :as io])
   (:use infer.matrix)
   (:use infer.measures)
   (:use infer.linear-models))
@@ -101,3 +102,16 @@
    (is (>= 0.0001 (euclidean-distance
 	 [-1.7078 1.1972 0.4182]
  	 (from-column-matrix (irls Y X Bguess 0.0001))))))
+
+;; (deftest lasso-test
+;;  (let [X (io/csv->matrix "/home/bradford/infer/data/lars_x.csv")
+;;        Xintercept (column-concat (column-matrix (repeat (row-count X) 1)) X)
+;; 	Y (io/csv->matrix "/home/bradford/infer/data/lars_y.csv")
+;; 	B (io/csv->matrix "/home/bradford/infer/data/lars_betas.csv")
+;; 	lambda (get-at (io/csv->matrix "/home/bradford/infer/data/lars_lambda.csv")
+;; 		       0 0)
+;; 	precision 0.00001
+;;         Bold (column-matrix (repeat (+ 1 (column-count X)) 0))
+;; 	ourB (lasso Y Xintercept Bold lambda precision)]
+;;  (is (= B ourB))))
+	
