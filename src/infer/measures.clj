@@ -350,6 +350,10 @@ the Euclidean distance or Euclidean metric is the ordinary distance between two 
  [a b]
 (minkowski-distance a b 2))
 
+(defn dot-product
+  [x y]
+  (apply + (map * x y)))
+
 (defn chebyshev-distance
 "In the limiting case of Lp reaching infinity we obtain the Chebyshev distance."
 [a b]
