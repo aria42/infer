@@ -161,3 +161,6 @@ A more robust implementation of the algorithm would also check whether the funct
 ;; 				(rand)) [sbestnew ebestnew]
 ;; 				[sbest ebest])]
 ;;        (recur snext enext (+ k 1))))))
+
+
+;;http://en.wikipedia.org/wiki/Regularization_(mathematics)
