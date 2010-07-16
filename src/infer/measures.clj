@@ -350,6 +350,10 @@ the Euclidean distance or Euclidean metric is the ordinary distance between two 
  [a b]
 (minkowski-distance a b 2))
 
+(defn dot-product
+  [x y]
+  (apply + (map * x y)))
+
 (defn chebyshev-distance
 "In the limiting case of Lp reaching infinity we obtain the Chebyshev distance."
 [a b]
@@ -644,3 +648,19 @@ The Levenshtein distance has several simple upper and lower bounds that are usef
                      i (range 1 (+ 1 m))] [i j]))]
 
     ((table m) n)))
+
+(defn logistic-link
+  [yhat]
+  (/ 1 (+ 1 (exp (- yhat)))))
+
+(defn binomial-variance
+  [p]
+  (* p (- 1 p)))
+
+(defn poisson-link
+  [yhat]
+  (exp yhat))
+
+(defn poisson-variance
+  [mu]
+  mu)

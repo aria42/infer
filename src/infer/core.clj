@@ -19,6 +19,8 @@
 (defn ln [x]
   (MathUtils/log e x))
 
+(defn sign [x] (if (>= x 0) 1 -1))
+
 (defn cos [x] (Math/cos x)) 
 (defn acos [x] (Math/acos x)) 
 (defn sin [x] (Math/sin x)) 

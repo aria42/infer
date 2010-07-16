@@ -5,7 +5,7 @@
    Classifiers are maps of classifier-name -> functions, data are maps of
    feature-name features."
   (:use infer.features)
-  (:use infer.smoothing)
+  (:use infer.neighbors)
   (:use infer.linear-models)
   (:use [clojure.contrib.map-utils :only [deep-merge-with]])
   (:use [infer.core :only [safe threshold-to map-map levels-deep all-keys]])

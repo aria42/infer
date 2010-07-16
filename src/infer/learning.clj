@@ -1,6 +1,7 @@
 (ns infer.learning
   (:use clojure.set)
   (:use clojure.contrib.math)
+  (:use infer.core)
   (:use infer.matrix)
   (:use infer.measures)
   (:use infer.probability)
@@ -73,6 +74,41 @@ vecs: feature-target vectors"
 ;;move best into set of selected
 		   (recur (conj S (index-of-max goal xis))))))]
   (mrmr S*)))
+
+(defn naive-convergence? [precision Bnew Bold]
+(any? true? 
+	   (map (fn [bnew bold]
+		   (and
+		    (not (= 0 bold))
+		    (< (abs (- bnew bold)) precision)))
+		Bnew
+		Bold)))
+
+(defn euclidean-convergence? [precision Bnew Bold]
+    (<= (euclidean-distance Bnew Bold)
+	    precision))
+
+(defn active-set [B]
+  (filter (complement nil?)
+  (map (fn [b i] (if (not (= 0 b)) i nil))
+       B
+       (range 0 (count B)))))
+
+(defn active-set-convergence? [Bnew Bold]
+  (= (active-set Bnew)
+     (active-set Bold)))
+
+(defn coordinate-descent
+  ([f Bold converged? j]
+     (coordinate-descent f 1 Bold converged? j))
+  ([f n Bold converged? j]
+     (let [Bold-snapshot (copy-matrix Bold) ;;WARNING: Bold is mutated duirng the inner loop.
+	   Bnew  (f Bold j)]
+       (if (converged?
+		(from-column-matrix Bnew)
+		(from-column-matrix Bold-snapshot))
+	 {:betas Bnew :iterations n}
+	 (recur f (+ n 1) Bnew converged? j)))))
 
 (defn dydx [f x1 x0]
   (let [fx1 (apply f x1)
