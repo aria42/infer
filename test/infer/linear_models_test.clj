@@ -105,13 +105,12 @@
 
 ;; (deftest lasso-test
 ;;  (let [X (io/csv->matrix "/home/bradford/infer/data/lars_x.csv")
-;;        Xintercept (column-concat (column-matrix (repeat (row-count X) 1)) X)
 ;; 	Y (io/csv->matrix "/home/bradford/infer/data/lars_y.csv")
 ;; 	B (io/csv->matrix "/home/bradford/infer/data/lars_betas.csv")
 ;; 	lambda (get-at (io/csv->matrix "/home/bradford/infer/data/lars_lambda.csv")
 ;; 		       0 0)
 ;; 	precision 0.00001
-;;         Bold (column-matrix (repeat (+ 1 (column-count X)) 0))
-;; 	ourB (lasso Y Xintercept Bold lambda precision)]
+;;         Bold (column-matrix (repeat (column-count X) 0))
+;; 	ourB (lasso Y X Bold lambda precision)]
 ;;  (is (= B ourB))))
 	

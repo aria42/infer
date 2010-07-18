@@ -71,6 +71,14 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
 				(from-column-matrix Bold)) precision) Bnew
 	(recur Y X linkfn varfn Bnew precision))))
 
+(defn lasso-penalty [Bj* lambda]
+  (* (sign Bj*)
+     (max 0 (- (abs Bj*) lambda))))
+
+(defn elastic-net-penalty [Bj* lambda alpha]
+ (/ (lasso-penalty Bj* (* lambda alpha))  
+  (- 1 (* lambda (- 1 alpha)))))
+
 (defn lasso [Y X Bold lambda precision]
   (let [inner (fn [Blast j]
 		 (let [Xj (select-columns X [j])
@@ -80,9 +88,9 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
 			   (times Xj (get-at Blast j 0)))
 		       Bj* (/ (times (trans Xj) Rj)
 			      (row-count X))
-		       Bjnew (* (sign Bj*)
-				    (max 0 (- (abs Bj*) lambda)))
+		       Bjnew (lasso-penalty Bj* lambda)
 		       _ (set-at Blast Bjnew j 0)]
 		   (if (= 0 j) Blast
 		       (recur Blast (- j 1)))))]
-  (coordinate-descent inner Bold active-set-convergence? (- (column-count X) 1))))
+  (coordinate-descent inner Bold (partial coordinate-convergence? precision)
+					  (- (column-count X) 1))))

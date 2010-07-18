@@ -75,7 +75,7 @@ vecs: feature-target vectors"
 		   (recur (conj S (index-of-max goal xis))))))]
   (mrmr S*)))
 
-(defn naive-convergence? [precision Bnew Bold]
+(defn coordinate-convergence? [precision Bnew Bold]
 (any? true? 
 	   (map (fn [bnew bold]
 		   (and
