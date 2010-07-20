@@ -1,5 +1,6 @@
 (ns infer.measures-test
   (:use clojure.test)
+  (:use infer.matrix)
   (:use infer.measures))
 
 (deftest sum-test
@@ -164,3 +165,9 @@
 
 (deftest test-dot-product
   (is (= 100 (dot-product [5 5 5 5] [5 5 5 5]))))
+
+(deftest nuclear
+  (is (= 10 (nuclear-norm (matrix (I 10 10))))))
+
+(deftest frobenius
+  (is (= 10 (frobenius-norm (matrix (I 100 100)))))) 
