@@ -17,6 +17,9 @@ Infer seeks to be a new kind of data tool.
 
 3)  Infer was initially extracted from real life research and deployment of machine learning systems.  It has the philosophy that abstractions should be composable so that you can try out different algorithms, and different combinations of measures, models, and learning algorithms. Most systems, like R, Weka, Lingpipe, or Matlab, for example, have all the methods coded up in silos, and not meant to be used composably.  Want to learn tree models using different loss functions, different measures of statistical diveregence, or a different peanalized learning algorithm?  Traditional libraries say too bad, Infer says, rock it out.
 
+[also talk about that we do not aim to replicate everything in a classical stats lib.  rather, our focus is on useful applied modern research tools for industrial strength machine learning systems.  built on matrices and clojure data structures, probabilities, measures, linear models, nearest neighbor methods, tree and graph models, regularized learning algorithms.]
+
+
 What is in Infer?
 
 Infer is broad and covers, or intends to cover, most of what you'll find in statistical and machine learning.
