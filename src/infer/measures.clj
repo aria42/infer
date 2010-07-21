@@ -3,6 +3,7 @@
   (:use clojure.contrib.map-utils)
   (:use clojure.set)
   (:use infer.core)
+  (:use infer.matrix)
   (:use [infer.probability :only [gt lt binary]])
   (:import org.apache.commons.math.stat.StatUtils)
   (:import [org.apache.commons.math.stat.correlation
@@ -664,3 +665,25 @@ The Levenshtein distance has several simple upper and lower bounds that are usef
 (defn poisson-variance
   [mu]
   mu)
+
+;; TODO: these matrix norms are still incredibly naive.
+;; Need to update them accordingly.
+
+(defn nuclear-norm
+  "Sum of the singular values of a matrix A.  Naive approach."
+  [A]
+  (let 
+    [[_ S _] (svd A)
+    S* (from-matrix S)
+    nn (reduce + (filter (complement zero?) (flatten S*)))]
+    nn))
+
+(defn frobenius-norm
+  "Square root of the sum of squared entries of matrix A.  Naive approach."
+  [A]
+  (let
+    [Af (sqrt
+          (reduce + 
+            (map #(* % %)s 
+               (flatten (from-matrix A)))))]
+    Af))
