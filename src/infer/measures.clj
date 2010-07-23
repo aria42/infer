@@ -684,6 +684,6 @@ The Levenshtein distance has several simple upper and lower bounds that are usef
   (let
     [Af (sqrt
           (reduce + 
-            (map #(* % %)
+            (map #(* % %) 
                (flatten (from-matrix A)))))]
     Af))
