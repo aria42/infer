@@ -94,3 +94,41 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
 		       (recur Blast (- j 1)))))]
   (coordinate-descent inner Bold (partial coordinate-convergence? precision)
 					  (- (column-count X) 1))))
+
+(defn soft-impute 
+  "From 'Spectral Regularization Algorithms for Learning Large Incomplete Matrices',
+  by Mazumder, Hastie, and Tibshirani.
+  
+  Finds a low-rank approximation of X using nuclear norm minimization / regularization,
+  via soft thresholding.
+  Inefficient version of a naive algorithm.
+  
+  TODO: 
+  - write test cases.
+  "
+  [X lambda precision]
+  (let [
+      Zfirst (fill 0.0 (row-count X) (column-count X))
+      thresholder (fn [value] (max (- value lambda) 0))
+      s-i (fn [Zold] 
+        ;; compute Znew
+        (let [[U D Vt] (svd (plus (X Zold)))
+               D+ (matrix (map #(map thresholder %) (from-matrix D)))
+               Znew (times U D+ Vt)
+               FnormZnew (frobenius-norm (minus Znew Zold))
+               FnormZold (frobenius-norm Zold)
+               testratio (/ (pow FnormZnew 2) (pow FnormZold 2))]
+          (if (< testratio precision)
+            Znew
+            (recur Znew))))]
+    (s-i Zfirst)))
+
+(defn hard-impute
+  "From 'Spectral Regularization Algorithms for Learning Large Incomplete Matrices',
+  by Mazumder, Hastie, and Tibshirani.
+  
+  Finds a low-rank approximation of X using nuclear norm minimization / regularization,
+  via hard thresholding."
+  [X lambda precision]
+  
+  )

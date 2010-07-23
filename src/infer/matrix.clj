@@ -50,6 +50,11 @@
 "identity matrix"
 [& dimensions] (MatrixFactory/eye (long-array dimensions)))
 
+; (defn zero-matrix
+;   "Creates a matrix of zeros of dimension r c."
+;   [r c]
+;   (MatrixFactory/zeros (long-array [r c])))
+
 (defn rand-elems
   ([n]
      (let [ra (Random.)]
