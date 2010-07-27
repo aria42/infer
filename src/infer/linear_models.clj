@@ -1,5 +1,6 @@
 (ns infer.linear-models
   (:use clojure.contrib.math)
+  (:use clojure.set)
   (:use infer.core)
   (:use infer.matrix)
   (:use infer.learning)
@@ -75,9 +76,14 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
   (* (sign Bj*)
      (max 0 (- (abs Bj*) lambda))))
 
+;;TODO: verifiy that this is correct.
+;;TODO: all Lp balls to measures.
 (defn elastic-net-penalty [Bj* lambda alpha]
  (/ (lasso-penalty Bj* (* lambda alpha))  
   (- 1 (* lambda (- 1 alpha)))))
+
+;;TODO: compare with scikits.learn impl.'
+;;http://github.com/ogrisel/scikit-learn/blob/master/scikits/learn/src/cd_fast.pyx#L91
 
 (defn lasso [Y X Bold lambda precision]
   (let [inner (fn [Blast j]
@@ -92,7 +98,7 @@ http://en.wikipedia.org/wiki/Tikhonov_regularization
 		       _ (set-at Blast Bjnew j 0)]
 		   (if (= 0 j) Blast
 		       (recur Blast (- j 1)))))]
-  (coordinate-descent inner Bold (partial coordinate-convergence? precision)
+    (coordinate-descent inner Bold active-set-convergence? ;;(partial coordinate-convergence? precision)
 					  (- (column-count X) 1))))
 
 (defn soft-impute 

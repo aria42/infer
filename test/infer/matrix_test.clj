@@ -2,6 +2,10 @@
   (:use clojure.test
 	infer.matrix))
 
+(deftest leave-out-columns
+  (is (= #{0 1 4}
+     (leave-out [2 3] (range 0 5)))))
+
 (deftest inc-at-test
   (let [A (fill 0 3 3)]
     (inc-at A 0 0)

@@ -1,4 +1,5 @@
 (ns infer.matrix
+  (:use clojure.set)
   (:import java.util.Random)
   (:import [org.ujmp.core Matrix
 	    MatrixFactory
@@ -7,6 +8,9 @@
   (:import [org.ujmp.core.doublematrix DenseDoubleMatrix2D DoubleMatrix2D])
   (:import org.ujmp.core.calculation.Calculation$Ret)
   (:import org.ujmp.core.doublematrix.calculation.general.decomposition.Chol))
+
+(defn leave-out [js ys]
+  (difference (into #{} ys) (into #{} js)))
 
 (defn ensure-vecs [xs]
   (let [to-vec #(if (vector? %) % (vec %))]
