@@ -91,7 +91,9 @@
 ;;Predicates and constraints
 (defn pred [f arg] #(f % arg))
 (defn gt [y] (pred > y))
+(defn ge [y] (pred >= y))
 (defn lt [y] (pred < y))
+(defn le [y] (pred <= y))
 (defn eq [y] (pred = y))
 (defn ne [y] (pred (comp not =) y))
 
