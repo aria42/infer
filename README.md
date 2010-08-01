@@ -1,8 +1,6 @@
 # Infer
 ## Inference and Machine Learning in Clojure
 
-- Copyright (c) Blaise Pascal and Pierre de Fermat and released under the MIT License (http://www.opensource.org/licenses/mit-license.php).
-
 *WARNING*: this is an early project and the API will have breaking changes.
 
 Infer is a library for machine learning and statistical inference, designed to be used in real production systems.
@@ -47,3 +45,5 @@ Infer is broad and covers, or intends to cover, most of what you'll find in stat
 - generalized classification & regression (stuff that currently lives in classification)
 
 - *features*:  easy to deal with feature representations as a matrix, a Clojure vector of vectors, or nested maps, and transforming between the options.  easy dealing with continuous or discrete, or discretizing continuous variables (currently in *classification*).  merging equivalence classes.
+
+- Copyright (c) Bradford Cross and Hamilton Ulmer released under the MIT License (http://www.opensource.org/licenses/mit-license.php).
