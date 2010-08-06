@@ -34,14 +34,6 @@
    #(pmap mi-from-matrix (feature-target-pairs A %))
    (range 0 (column-count A))))
 
-(defn- max-by [keyfn coll]
-  (if (empty? coll) nil
-      (let [maxer (fn [max-elem next-elem]
-		    (if (> (keyfn max-elem) (keyfn next-elem))
-		      max-elem
-		      next-elem))]
-	(reduce maxer coll))))
-
 (defn index-of-max [v indices]
  (second (max-by first (map vector v indices))))
 
