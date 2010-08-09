@@ -1,27 +1,43 @@
-(ns infer.streaming)
+(ns infer.streaming
+  (:import infer.RollingQueue
+	   infer.Statistic
+	   infer.RollingStatistic))
 
-;;WARNING: gnarlley unguarded mutation back here.  This is not meant to be called by multiple concurrent callers, it is meant to be used only in isolation.  It can be wrapped with a checkpointer, but not a memoizer.  It is stricly for use with updating streams.
-(defn rolling [f p n]
+(defn roll
+"Closes over the state of a streaming statistical calculation via a RollingStatistic.
+
+Closes over the state of the window of data from the stream necessary for the calculation via a RollingQueue of length n.
+
+WARNING: gnarley unguarded mutation in the RollingStatistic and RollingQueue.  This is not meant to be called raw by multiple concurrent callers.
+
+It's native use case is in isolation.  Each rolling statistic instance being attached to a different data stream.
+
+It can be wrapped with a checkpointer, but not a memoizer.
+
+It can be wrapped with a lock to be safe for parallel updates to a single rolling statistic.
+"
+ [#^RollingStatistic stat n]
   (let [q (RollingQueue. n)]
     (fn [x]
       (if (.isPrimed q) 
-      (f x (.enqueue q x))
-      (let [pr (p x (.enqueue q x))]
+      (.calculate stat x (.enqueue q x))
+      (let [pr (.prime stat x)
+	    _ (.enqueue q x)]
 	(if (.isPrimed q) pr Double/NaN))))))
 
-;; (defn sum [new old]
-  
-;;             sum = sum - compoundQueueOfDoublesfixedLengthQueue.Enqueue(d) + d;
-;;             return sum;
-;;         }
+(defn acc
+"Closes over the state of a streaming statistical calculation via a Statistic.
 
-;;         protected override double prime(double d)
-;;         {
-;;             sum = initialSum.Calculate(d);
-;;             compoundQueueOfDoublesfixedLengthQueue.Enqueue(d);
-;;             return sum;
-;;         }
-;;     }
+WARNING: gnarley unguarded mutation in the Statistic.  This is not meant to be called raw by multiple concurrent callers.
+
+It's native use case is in isolation.  Each rolling statistic instance being attached to a different data stream.
+
+It can be wrapped with a checkpointer, but not a memoizer.
+
+It can be wrapped with a lock to be safe for parallel updates to a single rolling statistic.
+"
+[#^Statistic stat]
+(fn [x] (.calculate stat x)))
 
 
 ;;http://en.wikipedia.org/wiki/Selection_algorithm

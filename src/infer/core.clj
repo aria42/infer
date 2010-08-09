@@ -283,10 +283,17 @@
   	[new-key v]
         (flatten-level new-key v)))) nil nested-map))))
 
-(defn max-by [keyfn coll]
+
+(defn best-by [compare keyfn coll]
   (if (empty? coll) nil
-      (let [maxer (fn [max-elem next-elem]
-		    (if (> (keyfn max-elem) (keyfn next-elem))
-		      max-elem
+      (let [best-finder (fn [best next-elem]
+		    (if (compare (keyfn best) (keyfn next-elem))
+		      best
 		      next-elem))]
-	(reduce maxer coll))))
+	(reduce best-finder coll))))
+
+(defn max-by [keyfn coll]
+  (best-by > keyfn coll))
+
+(defn min-by [keyfn coll]
+  (best-by < keyfn coll))
