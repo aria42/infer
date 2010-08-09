@@ -282,3 +282,11 @@
         (if (not (map? v))
   	[new-key v]
         (flatten-level new-key v)))) nil nested-map))))
+
+(defn max-by [keyfn coll]
+  (if (empty? coll) nil
+      (let [maxer (fn [max-elem next-elem]
+		    (if (> (keyfn max-elem) (keyfn next-elem))
+		      max-elem
+		      next-elem))]
+	(reduce maxer coll))))

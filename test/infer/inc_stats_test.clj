@@ -35,3 +35,4 @@
   (is (= 3 (.getAtLookback q 2)))
   (is (= 1 (.getAtIndex q 2)))
   (is (= 3 (.getLength q)))))))
+
