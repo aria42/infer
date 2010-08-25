@@ -36,6 +36,12 @@
 	b (from-matrix A)]
 	(is (= a b))))
 
+(deftest to-and-from-sparse-matrix
+  (let [a [{0 1, 5 2, 9 3} {4 4,9 5, 16 6}]
+	A (sparse-matrix a)
+	b (from-sparse-2d-matrix A)]
+    (is (= a b))))
+
 (deftest to-and-from-column-matrix
   (let [a [1 2 3]
 	A (column-matrix

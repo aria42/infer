@@ -1,8 +1,6 @@
 # Infer
 ## Inference and Machine Learning in Clojure
 
-*WARNING*: this is an early project and the API will have breaking changes.
-
 Infer is a library for machine learning and statistical inference, designed to be used in real production systems.
 
 Infer is written in [Clojure](http://clojure.org/) and leverages many JVM packages.
