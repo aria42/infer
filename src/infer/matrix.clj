@@ -7,6 +7,8 @@
   (:import [org.ujmp.core.matrix Matrix2D])
   (:import [org.ujmp.colt
 	    ColtSparseDoubleMatrix2D])
+  (:import [org.ujmp.parallelcolt
+	    ParallelColtSparseDoubleMatrix2D])
   (:import [org.ujmp.core.doublematrix
 	    DoubleMatrix DenseDoubleMatrix2D
 	    DoubleMatrix2D SparseDoubleMatrix2D])
@@ -40,13 +42,13 @@
 	:else
 	(MatrixFactory/importFromArray #^"[[D" (doubles-2d xs))))
 
-(defn sparse-matrix [xs]
+(defn- sparse-matrix* [xs mk-matrix]
   (let [n-rows (count xs)
 	cols (reduce (fn [acc row]
 		       (union acc (into #{} (keys row))))
 		     #{}
 		     xs)
-	m (MatrixFactory/sparse (long-array [n-rows (+ (apply max cols) 1)]))
+	m (mk-matrix (long-array [n-rows (+ (apply max cols) 1)]))
 	row-indices (range 0 (count xs))]
     (dorun
      (map (fn [row r]
@@ -57,6 +59,15 @@
 	  row-indices))
     m))
 
+(defn sparse-matrix [xs]
+ (sparse-matrix* xs #(MatrixFactory/sparse %)))
+
+(defn sparse-colt-matrix [xs]
+ (sparse-matrix* xs #(ColtSparseDoubleMatrix2D. %)))
+
+(defn sparse-pcolt-matrix [xs]
+ (sparse-matrix* xs #(ParallelColtSparseDoubleMatrix2D. %)))
+
 (defn from-sparse-matrix [m]
   (map (fn [coord]
 	 (conj (into [] (map int coord)) (.getDouble m coord)))
@@ -66,23 +77,6 @@
   (let [map-row (fn [[r row]] (into {} (map (fn [[_ b c]] [b c]) row)))]
     (map map-row
 	 (group-by first (from-sparse-matrix m)))))
-
-(defn sparse-colt-matrix [xs]
-  (let [n-rows (count xs)
-	cols (reduce (fn [acc row]
-		  (union acc (into #{} (keys row))))
-		#{}
-		xs)
-	m (ColtSparseDoubleMatrix2D.  (long-array [n-rows (+ (apply max cols) 1)]))
-	row-indices (range 0 (count xs))]
-    (dorun
-     (map (fn [row r]
-	    (dorun (map (fn [[c v]]
-		   (.setDouble m v (long-array [r c])))
-		 row)))
-	  xs
-	  row-indices))
-    m))
 
 (defn column-matrix [ys]
   (matrix (map vector ys)))
