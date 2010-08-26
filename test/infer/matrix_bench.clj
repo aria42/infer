@@ -28,12 +28,12 @@ that can happen and just results in slighly higher sparsity % than s for that ro
 	b (sparse-matrix (rand-sparse-rows rB cB s))]
     (bench-matrix n op a b)))
 
-(defn bench-sparse-colt-times [n op rA cA rB cB s] 
+(defn bench-sparse-colt [n op rA cA rB cB s] 
   (let [a (sparse-colt-matrix (rand-sparse-rows rA cA s))
 	b (sparse-colt-matrix (rand-sparse-rows rB cB s))]
     (bench-matrix n op a b)))
 
-(defn bench-sparse-pcolt-times [n op rA cA rB cB s] 
+(defn bench-sparse-pcolt [n op rA cA rB cB s] 
   (let [a (sparse-pcolt-matrix (rand-sparse-rows rA cA s))
 	b (sparse-pcolt-matrix (rand-sparse-rows rB cB s))]
     (bench-matrix n op a b)))
@@ -42,5 +42,5 @@ that can happen and just results in slighly higher sparsity % than s for that ro
   (cons (bench-dense n op rA cA rB cB)
 	(doall (map #(apply % args)
 		    [bench-sparse
-		     bench-sparse-colt-times
-		     bench-sparse-pcolt-times]))))
+		     bench-sparse-colt
+		     bench-sparse-pcolt]))))
