@@ -6,7 +6,7 @@
 
 
 (defn- lee-seung-X-update [M X Y eps]                       
-  (let [numer (m/times (m/trans Y) M)
+  (let [numer (m/times  M (m/trans Y))
         denom (m/times X Y (m/trans Y))        
         X-update 
           (m/update-in-place!
@@ -18,9 +18,8 @@
         col-sums  
           (->>
             (m/elem-seq X-update)
-            (group-by second)
             (reduce
-              (fn [res [_ [i j v]]]
+              (fn [res [i j v]]
                 (assoc res j (+ v (get res j 0.0))))
               {}))]
     (m/update-in-place! 
@@ -38,13 +37,14 @@
               (+ (m/get-at denom i j) eps))))
       (m/copy-matrix Y))))
 
+
 (defn- lee-seung-nmf [M k 
                       {:keys [num-iters,eps] 
-                       :or {num-iters 10 eps 1.0e-9}
+                       :or {num-iters 1000 eps 1.0e-4}
                        :as opts }]                      
   (loop [iter 0
-         X (m/rand-elems (m/row-count M) k) 
-         Y (m/rand-elems k (m/column-count M))]
+         X (m/fill-rand (m/row-count M) k) 
+         Y (m/fill-rand k (m/column-count M))]
     (if (= iter num-iters)  [X Y]
       (recur (inc iter)
              (lee-seung-X-update M X Y eps)

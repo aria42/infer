@@ -212,7 +212,17 @@
 (defn elementwise-minus [e M]
 (minus (fill e (row-count M) (column-count M))
        M))
+       
+(defn elem-seq [#^Matrix A]
+  (for [i (range (row-count A)) j (range (column-count A))]
+    [i j (get-at A i j)]))       
 
+(defn update-in-place! [f #^Matrix A]
+  (dotimes [i (row-count A)]
+    (dotimes [j (column-count A)]
+      (set-at A (f i j (get-at A i j)) i j)))
+  A)
+       
 (defn trans [#^DenseDoubleMatrix2D A]
   (.transpose A))
 
