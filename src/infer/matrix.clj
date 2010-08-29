@@ -231,15 +231,50 @@
 (minus (fill e (row-count M) (column-count M))
        M))
        
-(defn elem-seq [#^Matrix A]
+(defn elem-seq [A]
+  {:doc "Returns seq of [row-index col-index val] for the entries of a matrix"
+   :author "Aria Haghighi (aria@cs.umass.edu)"}
   (for [i (range (row-count A)) j (range (column-count A))]
     [i j (get-at A i j)]))       
 
-(defn update-in-place! [f #^Matrix A]
+(defn update-matrix! 
+  {:doc "Destructively apply a function to elements of a matrix in place. Returns updated matrix.
+   f: (row-index,col-index,cur-val) -> new-val
+   A: matrix"
+   :author "Aria Haghighi (aria@cs.umass.edu)"}
+  [f A]
   (dotimes [i (row-count A)]
     (dotimes [j (column-count A)]
       (set-at A (f i j (get-at A i j)) i j)))
   A)
+
+(defn update-matrix
+  {:doc "Non-destructively apply a function to elements of a matrix. Returns updated matrix.
+   f: (row-index,col-index,cur-val) -> new-val
+   A: matrix"
+   :author "Aria Haghighi (aria@cs.umass.edu)"}
+  [f A]
+  (update-matrix! f (copy-matrix A)))
+
+(defn abs
+  {:doc "Return copy of matrix with absolute value applied to each"
+   :author "Aria Haghighi (aria@cs.umass.edu)"}
+  [A]
+  (update-matrix
+    (fn [i j v] (Math/abs v))
+    A))  
+
+(defn frobenius-norm
+  {:doc "Frobenius norm of a matrix. Same as the norm of a vector except you flatten
+         all the elements of matrix out"
+   :author "Aria Haghighi (aria@cs.umass.edu)"}
+  ([X p] 
+    (Math/pow 
+       (reduce 
+         (fn [res [i j v]] (+ res (-> v Math/abs (Math/pow p)))) 
+         0.0 (elem-seq X))
+       (/ 1.0 p)))
+  ([X] (frobenius-norm X 2.0)))  
        
 (defn trans [#^DenseDoubleMatrix2D A]
   (.transpose A))
