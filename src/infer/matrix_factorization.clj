@@ -91,6 +91,10 @@
   (internal-factorize [this M k] (lee-seung-factorize M k opts)))    
 
 
+;; --------------------------------------------------------
+;;  Main Method
+;; --------------------------------------------------------
+
 (defn factorize 
   "Approximately factorizes M into [X,Y] with some implementation. This
    is where to go if you don't want to think about any details. The only
@@ -98,3 +102,4 @@
    k should be smaller than the maximum of the rows or column of M"
   [M k]  
   (internal-factorize (LeeSeungFactorization. {:num-iters 100}) M k))
+
