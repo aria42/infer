@@ -231,11 +231,16 @@
 (minus (fill e (row-count M) (column-count M))
        M))
        
-(defn elem-seq [A]
-  {:doc "Returns seq of [row-index col-index val] for the entries of a matrix"
-   :author "Aria Haghighi (aria@cs.umass.edu)"}
-  (for [i (range (row-count A)) j (range (column-count A))]
-    [i j (get-at A i j)]))       
+(defn elem-seq [#^DoubleMatrix A]
+  {:doc "Returns seq of [row-index col-index val] for the entries of a matrix.
+         Only walks over present entries for sparse matrices"
+   :author "Aria Haghighi (aria@cs.umass.edu)"}   
+  (if (.isSparse A)
+     (for [#^longs coors (-> A .availableCoordinates .iterator iterator-seq)
+           :let [i (int (aget coors 0)) j (int (aget coors 1))]]
+       [i j (.getDouble A coors)])
+     (for [i (range (row-count A)) j (range (column-count A))]
+      [i j (get-at A i j)])))       
 
 (defn update-matrix! 
   {:doc "Destructively apply a function to elements of a matrix in place. Returns updated matrix.

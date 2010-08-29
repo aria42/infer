@@ -1,7 +1,9 @@
 (ns infer.matrix-factorization
   {:doc "Non-negative matrix factorization routines. Currently
         only the classical Lee-Seung multiplicative update is 
-        available."
+        available. Should respect sparsity of matrix if present.
+        
+        TODO: Alternating Least Squares"
   :author "Aria Haghighi (aria@cs.umass.edu)"}  
   (:require [infer.matrix :as m]))
 
