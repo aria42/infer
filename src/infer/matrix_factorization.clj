@@ -49,7 +49,8 @@
 
 (defn- lee-seung-X-update [M X Y eps]
   (let [numer (m/times  M (m/trans Y))
-        denom (m/times X Y (m/trans Y))
+        ; X (Y Y') is faster than (X Y) Y'
+        denom (m/times X (m/times Y (m/trans Y)))
         update-fn 
           (fn [i j v]
               (* v

@@ -261,14 +261,6 @@
   [f A]
   (update-matrix! f (copy-matrix A)))
 
-(defn abs
-  {:doc "Return copy of matrix with absolute value applied to each"
-   :author "Aria Haghighi (aria@cs.umass.edu)"}
-  [A]
-  (update-matrix
-    (fn [i j v] (Math/abs v))
-    A))  
-
 (defn frobenius-norm
   {:doc "Frobenius norm of a matrix. Same as the norm of a vector except you flatten
          all the elements of matrix out"
