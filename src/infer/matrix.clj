@@ -260,18 +260,6 @@
    :author "Aria Haghighi (aria@cs.umass.edu)"}
   [f A]
   (update-matrix! f (copy-matrix A)))
-
-(defn frobenius-norm
-  {:doc "Frobenius norm of a matrix. Same as the norm of a vector except you flatten
-         all the elements of matrix out"
-   :author "Aria Haghighi (aria@cs.umass.edu)"}
-  ([X p] 
-    (Math/pow 
-       (reduce 
-         (fn [res [i j v]] (+ res (-> v Math/abs (Math/pow p)))) 
-         0.0 (elem-seq X))
-       (/ 1.0 p)))
-  ([X] (frobenius-norm X 2.0)))  
        
 (defn trans [#^DenseDoubleMatrix2D A]
   (.transpose A))

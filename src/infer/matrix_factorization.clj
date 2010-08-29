@@ -5,6 +5,7 @@
         
         TODO: Alternating Least Squares"
   :author "Aria Haghighi (aria@cs.umass.edu)"}  
+  (:use [infer.measures :only [frobenius-norm]])
   (:require [infer.matrix :as m]))
 
 
@@ -17,7 +18,7 @@
 (defn frobenius-error 
   "returns frobenius norm error of approximation e.g., || M - XY ||_2"
   [M X Y]
-  (m/frobenius-norm (m/minus M (m/times X Y))))
+  (frobenius-norm (m/minus M (m/times X Y))))
 
 
 ;; -------------------------------------------------------
